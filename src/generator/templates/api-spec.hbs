@@ -1,0 +1,33 @@
+import { test, expect } from '../../src/fixtures/index.js';
+
+/**
+ * Auto-generated API tests for: {{groupName}}
+ * Source: {{source}}
+ * Generated at: {{timestamp}}
+ *
+ * You can freely edit this file to add custom assertions and scenarios.
+ */
+
+test.describe('{{groupName}}', () => {
+{{#each endpoints}}
+
+  test('{{method}} {{path}} → should respond successfully', { tag: ['@api', '@{{../groupNameSlug}}'] }, async ({ apiClient }) => {
+    const response = await apiClient.{{lowerMethod}}('{{path}}'{{#if hasQueryParams}}, {
+      params: {
+      {{#each queryParams}}
+        {{name}}: {{exampleValue}},
+      {{/each}}
+      },
+    }{{/if}}{{#if hasRequestBody}}, {
+      data: {{{requestBodyExample}}},
+    }{{/if}});
+
+    expect(response.status()).toBeLessThan(500);
+  {{#if successSchema}}
+    // Validate response schema
+    const body = await response.json();
+    expect(body).toBeDefined();
+  {{/if}}
+  });
+{{/each}}
+});
