@@ -21,27 +21,27 @@
 - [x] 实现生成器 src/generator/index.ts（读取接口清单 → 按 tag/path 分组 → 生成 .spec.ts 文件）
 
 ## 5. Fixture 层
-- [ ] 实现认证 Fixture src/fixtures/auth.fixture.ts（静态 Header 模式 + 登录获取 Token 模式）
-- [ ] 实现 API Client Fixture src/fixtures/api-client.fixture.ts（封装 APIRequestContext + 自动注入 headers）
-- [ ] 聚合导出 src/fixtures/index.ts（test.extend 合并所有 fixture）
+- [x] 实现认证 Fixture src/fixtures/auth.fixture.ts（静态 Header 模式 + 登录获取 Token 模式）
+- [x] 实现 API Client Fixture src/fixtures/api-client.fixture.ts（封装 APIRequestContext + 自动注入 headers）
+- [x] 聚合导出 src/fixtures/index.ts（test.extend 合并所有 fixture）
 
 ## 6. 公共断言
-- [ ] 实现自定义 matchers src/assertions/api-matchers.ts（toMatchSchema, toBeSuccessful 等）
+- [x] 实现自定义 matchers src/assertions/api-matchers.ts（toMatchSchema, toBeSuccessful 等）
 
 ## 7. Playwright 配置
-- [ ] 创建 playwright.config.ts（集成环境切换、retry、trace、reporter、项目配置）
+- [x] 创建 playwright.config.ts（集成环境切换、retry、trace、reporter、项目配置）
 
 ## 8. 通知系统
-- [ ] 实现钉钉通知 src/reporters/dingtalk.ts（Webhook Markdown 消息卡片）
-- [ ] 实现邮件通知 src/reporters/email.ts（SMTP HTML 邮件）
-- [ ] 实现通知 Reporter src/reporters/notifier.reporter.ts（Playwright Reporter 接口，收集结果后触发通知）
+- [x] 实现钉钉通知 src/reporters/dingtalk.ts（Webhook Markdown 消息卡片）
+- [x] 实现邮件通知 src/reporters/email.ts（SMTP HTML 邮件）
+- [x] 实现通知 Reporter src/reporters/notifier.reporter.ts（Playwright Reporter 接口，收集结果后触发通知）
 
 ## 9. CLI
-- [ ] 搭建 CLI 框架 src/cli/index.ts（Commander.js 主入口 + bin 配置）
-- [ ] 实现 import 命令 src/cli/commands/import.ts（omni-qa import <source> --out --tag）
-- [ ] 实现 run 命令 src/cli/commands/run.ts（omni-qa run --env --tag --retry --trace）
-- [ ] 实现 report 命令 src/cli/commands/report.ts（omni-qa report 打开 HTML 报告）
+- [x] 搭建 CLI 框架 src/cli/index.ts（Commander.js 主入口 + bin 配置）
+- [x] 实现 import 命令 src/cli/commands/import.ts（omni-qa import <source> --out --tag）
+- [x] 实现 run 命令 src/cli/commands/run.ts（omni-qa run --env --tag --retry --trace）
+- [x] 实现 report 命令 src/cli/commands/report.ts（omni-qa report 打开 HTML 报告）
 
 ## 10. 集成测试与文档
-- [ ] 用 Petstore OpenAPI 文档做端到端验证（import → run → report → notify）
-- [ ] 编写 README.md 使用说明
+- [x] 用 Petstore OpenAPI 文档做端到端验证（import → run → report → notify）
+- [x] 编写 README.md 使用说明

@@ -26,9 +26,9 @@ export async function parseOpenAPI(source: string): Promise<ParsedAPI> {
   for (const [path, pathItem] of Object.entries(api.paths ?? {})) {
     if (!pathItem) continue;
 
-    const methods: (keyof OpenAPIV3.PathItemObject)[] = [
+    const methods = [
       'get', 'post', 'put', 'patch', 'delete', 'head', 'options',
-    ];
+    ] as const;
 
     for (const method of methods) {
       const operation = pathItem[method] as OpenAPIV3.OperationObject | undefined;

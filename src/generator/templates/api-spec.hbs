@@ -15,7 +15,7 @@ test.describe('{{groupName}}', () => {
     const response = await apiClient.{{lowerMethod}}('{{path}}'{{#if hasQueryParams}}, {
       params: {
       {{#each queryParams}}
-        {{name}}: {{exampleValue}},
+        {{name}}: {{{exampleValue}}},
       {{/each}}
       },
     }{{/if}}{{#if hasRequestBody}}, {
@@ -24,9 +24,12 @@ test.describe('{{groupName}}', () => {
 
     expect(response.status()).toBeLessThan(500);
   {{#if successSchema}}
-    // Validate response schema
-    const body = await response.json();
-    expect(body).toBeDefined();
+    // Validate response schema (only if JSON response)
+    const contentType = response.headers()['content-type'] ?? '';
+    if (contentType.includes('application/json')) {
+      const body = await response.json();
+      expect(body).toBeDefined();
+    }
   {{/if}}
   });
 {{/each}}
