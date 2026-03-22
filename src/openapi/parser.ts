@@ -1,5 +1,5 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
-import type { OpenAPI, OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import type {
   ParsedAPI,
   ParsedEndpoint,
@@ -34,6 +34,11 @@ export async function parseOpenAPI(source: string): Promise<ParsedAPI> {
       const operation = pathItem[method] as OpenAPIV3.OperationObject | undefined;
       if (!operation) continue;
 
+      const mergedParameters = mergeParameters(
+        pathItem.parameters as OpenAPIV3.ParameterObject[] | undefined,
+        operation.parameters as OpenAPIV3.ParameterObject[] | undefined
+      );
+
       endpoints.push({
         path,
         method: method.toUpperCase(),
@@ -41,7 +46,7 @@ export async function parseOpenAPI(source: string): Promise<ParsedAPI> {
         summary: operation.summary,
         description: operation.description,
         tags: operation.tags ?? ['default'],
-        parameters: parseParameters(operation.parameters as OpenAPIV3.ParameterObject[]),
+        parameters: parseParameters(mergedParameters),
         requestBody: parseRequestBody(operation.requestBody as OpenAPIV3.RequestBodyObject),
         responses: parseResponses(operation.responses as OpenAPIV3.ResponsesObject),
       });
@@ -49,6 +54,23 @@ export async function parseOpenAPI(source: string): Promise<ParsedAPI> {
   }
 
   return { title, version, baseURL, endpoints };
+}
+
+function mergeParameters(
+  pathParams?: OpenAPIV3.ParameterObject[],
+  operationParams?: OpenAPIV3.ParameterObject[]
+): OpenAPIV3.ParameterObject[] {
+  const merged = new Map<string, OpenAPIV3.ParameterObject>();
+
+  for (const param of pathParams ?? []) {
+    merged.set(`${param.in}:${param.name}`, param);
+  }
+
+  for (const param of operationParams ?? []) {
+    merged.set(`${param.in}:${param.name}`, param);
+  }
+
+  return Array.from(merged.values());
 }
 
 function parseParameters(params?: OpenAPIV3.ParameterObject[]): ParsedParameter[] {

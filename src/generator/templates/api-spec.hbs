@@ -12,14 +12,17 @@ test.describe('{{groupName}}', () => {
 {{#each endpoints}}
 
   test('{{method}} {{path}} → should respond successfully', { tag: ['@api', '@{{../groupNameSlug}}'] }, async ({ apiClient }) => {
-    const response = await apiClient.{{lowerMethod}}('{{path}}'{{#if hasQueryParams}}, {
+    const response = await apiClient.{{lowerMethod}}({{{requestPath}}}{{#if hasOptions}}, {
+    {{#if hasQueryParams}}
       params: {
       {{#each queryParams}}
         {{name}}: {{{exampleValue}}},
       {{/each}}
       },
-    }{{/if}}{{#if hasRequestBody}}, {
+    {{/if}}
+    {{#if hasRequestBody}}
       data: {{{requestBodyExample}}},
+    {{/if}}
     }{{/if}});
 
     expect(response.status()).toBeLessThan(500);

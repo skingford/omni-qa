@@ -8,7 +8,8 @@ export const importCommand = new Command('import')
   .argument('<source>', 'OpenAPI document path or URL (yaml/json)')
   .option('-o, --out <dir>', 'Output directory for generated test files', 'tests/api')
   .option('-t, --tag <tags...>', 'Only generate tests for specific tags')
-  .action(async (source: string, options: { out: string; tag?: string[] }) => {
+  .option('-f, --force', 'Overwrite existing generated files')
+  .action(async (source: string, options: { out: string; tag?: string[]; force?: boolean }) => {
     try {
       console.log(`\n📄 Importing OpenAPI document: ${source}\n`);
 
@@ -30,6 +31,7 @@ export const importCommand = new Command('import')
         source,
         outDir,
         filterTags: options.tag,
+        overwrite: options.force,
       });
 
       console.log(`\n✅ Generated ${files.length} test file(s)`);

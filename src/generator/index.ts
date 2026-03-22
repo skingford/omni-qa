@@ -1,5 +1,5 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Handlebars from 'handlebars';
@@ -13,28 +13,14 @@ Handlebars.registerHelper('lowerMethod', function (this: { method: string }) {
 });
 
 Handlebars.registerHelper('exampleValue', function (this: { schema?: Record<string, unknown>; example?: unknown; name: string }) {
-  if (this.example !== undefined) {
-    return JSON.stringify(this.example);
-  }
-  // Generate a sensible default based on schema type
-  const type = this.schema?.type as string | undefined;
-  switch (type) {
-    case 'integer':
-    case 'number':
-      return '1';
-    case 'boolean':
-      return 'true';
-    case 'array':
-      return '[]';
-    default:
-      return `'test-${this.name}'`;
-  }
+  return toLiteral(getExampleValue(this));
 });
 
 interface GenerateOptions {
   source: string;
   outDir: string;
   filterTags?: string[];
+  overwrite?: boolean;
 }
 
 /**
@@ -63,7 +49,7 @@ export async function generateTestFiles(
     const filePath = resolve(options.outDir, fileName);
 
     // Skip if file already exists (don't overwrite user edits)
-    if (existsSync(filePath)) {
+    if (existsSync(filePath) && !options.overwrite) {
       console.log(`  ⏭  Skipped (exists): ${fileName}`);
       continue;
     }
@@ -89,6 +75,8 @@ function prepareTemplateData(group: EndpointGroup, source: string) {
     endpoints: group.endpoints.map((ep) => ({
       ...ep,
       lowerMethod: ep.method.toLowerCase(),
+      requestPath: toLiteral(resolvePathParams(ep)),
+      hasOptions: ep.parameters.some((p) => p.in === 'query') || !!ep.requestBody,
       hasQueryParams: ep.parameters.some((p) => p.in === 'query'),
       queryParams: ep.parameters.filter((p) => p.in === 'query'),
       hasRequestBody: !!ep.requestBody,
@@ -105,4 +93,36 @@ function slugify(str: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+function resolvePathParams(endpoint: ParsedEndpoint): string {
+  const pathParams = endpoint.parameters.filter((param) => param.in === 'path');
+
+  return pathParams.reduce((path, param) => {
+    const value = getExampleValue(param);
+    return path.replaceAll(`{${param.name}}`, String(value));
+  }, endpoint.path);
+}
+
+function getExampleValue(input: { schema?: Record<string, unknown>; example?: unknown; name: string }): unknown {
+  if (input.example !== undefined) {
+    return input.example;
+  }
+
+  const type = input.schema?.type as string | undefined;
+  switch (type) {
+    case 'integer':
+    case 'number':
+      return 1;
+    case 'boolean':
+      return true;
+    case 'array':
+      return [`test-${input.name}`];
+    default:
+      return `test-${input.name}`;
+  }
+}
+
+function toLiteral(value: unknown): string {
+  return JSON.stringify(value, null, 2);
 }
