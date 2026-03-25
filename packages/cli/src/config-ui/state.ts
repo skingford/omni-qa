@@ -17,6 +17,10 @@ import {
   initializeProjectScaffold,
 } from '../scaffold/init-project.js';
 import type { InitAuthMode } from '../cli/templates/init.js';
+import {
+  getReportPreviewState,
+  type ReportPreviewState,
+} from '../testing/report-paths.js';
 
 const CONFIG_FILE = 'omni-qa.config.ts';
 const ENV_FILE = '.env';
@@ -38,6 +42,7 @@ export interface LoadedEditorState {
   config: OmniQAConfig;
   envText: string;
   paths: EditorPaths;
+  report: ReportPreviewState;
 }
 
 export type ConfigEditorState = BootstrapState | LoadedEditorState;
@@ -92,6 +97,7 @@ export async function loadEditorState(cwd = process.cwd()): Promise<ConfigEditor
     config: normalizeConfig(rawConfig),
     envText,
     paths: { configPath, envPath },
+    report: await getReportPreviewState(cwd),
   };
 }
 
@@ -112,6 +118,7 @@ export async function saveEditorState(
     config,
     envText: normalizeEnvText(state.envText),
     paths: { configPath, envPath },
+    report: await getReportPreviewState(cwd),
   };
 }
 

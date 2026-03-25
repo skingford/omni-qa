@@ -2,6 +2,9 @@ import type {
   ConfigStudioBootstrapPayload,
   ConfigStudioImportPayload,
   ConfigStudioImportResult,
+  ConfigStudioRunPayload,
+  ConfigStudioRunResult,
+  ConfigStudioRunSession,
   ConfigStudioSavePayload,
   ConfigStudioState,
 } from '../types'
@@ -61,4 +64,49 @@ export async function importConfigStudioSource(
   })
 
   return parseJsonResponse<ConfigStudioImportResult>(response)
+}
+
+export async function runConfigStudioTests(
+  payload: ConfigStudioRunPayload,
+): Promise<ConfigStudioRunResult> {
+  const response = await fetch(`${apiBaseUrl}/api/run`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseJsonResponse<ConfigStudioRunResult>(response)
+}
+
+export async function startConfigStudioRunSession(
+  payload: ConfigStudioRunPayload,
+): Promise<ConfigStudioRunSession> {
+  const response = await fetch(`${apiBaseUrl}/api/run/start`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseJsonResponse<ConfigStudioRunSession>(response)
+}
+
+export async function getConfigStudioRunSession(
+  sessionId: string,
+): Promise<ConfigStudioRunSession> {
+  const response = await fetch(`${apiBaseUrl}/api/run/${encodeURIComponent(sessionId)}`)
+  return parseJsonResponse<ConfigStudioRunSession>(response)
+}
+
+export async function stopConfigStudioRunSession(
+  sessionId: string,
+): Promise<ConfigStudioRunSession> {
+  const response = await fetch(`${apiBaseUrl}/api/run/${encodeURIComponent(sessionId)}/stop`, {
+    method: 'POST',
+  })
+
+  return parseJsonResponse<ConfigStudioRunSession>(response)
 }

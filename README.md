@@ -104,6 +104,10 @@ Open a local browser-based config studio for editing:
 - auth mode (none / static headers / login to fetch token)
 - notification channels (DingTalk / email)
 - `.env` secrets and placeholders
+- importing an OpenAPI document and generating test files from the page
+- running Playwright tests and opening the latest HTML report from the page
+- live run output while Playwright is still executing
+- stopping an in-flight Playwright run from the page
 - first-run bootstrap when `omni-qa.config.ts` does not exist yet
 
 ```bash
@@ -115,6 +119,7 @@ omni-qa config --port 4321 --no-open
 ```
 
 If the current workspace does not have `/Users/kingford/workspace/github.com/omni-qa/omni-qa.config.ts` yet, the studio now opens in a bootstrap flow so you can visually choose the default environment, base URL, auth mode, notifications, and whether to create `.env`.
+Once a config exists, the right-side tools also let you paste an OpenAPI URL or local file path, optionally filter tags, generate test files, run Playwright against a selected environment, and open the latest HTML report without leaving the page.
 
 For frontend-only development, the config studio now lives in `/Users/kingford/workspace/github.com/omni-qa/apps/config-studio`:
 

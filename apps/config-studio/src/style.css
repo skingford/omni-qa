@@ -323,7 +323,9 @@ button.ghost {
 }
 
 .toggle-grid,
-.checklist {
+.checklist,
+.toggle-stack,
+.run-actions {
   display: grid;
   gap: 12px;
 }
@@ -337,6 +339,10 @@ button.ghost {
   align-items: flex-start;
   gap: 12px;
   cursor: pointer;
+}
+
+.toggle-stack {
+  align-content: start;
 }
 
 .toggle-card.compact {
@@ -404,6 +410,37 @@ button.ghost {
   padding: 10px 12px;
   overflow-x: auto;
   white-space: nowrap;
+}
+
+.run-actions {
+  grid-template-columns: repeat(auto-fit, minmax(220px, max-content));
+  align-items: center;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(112, 79, 38, 0.18);
+  background: rgba(255, 249, 241, 0.9);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.log-output {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(44, 34, 21, 0.92);
+  color: #fef6ec;
+  font: 0.9rem/1.55 'SFMono-Regular', 'SF Mono', Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .command-list {

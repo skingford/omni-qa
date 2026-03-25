@@ -13,6 +13,9 @@ import {
   type SaveEditorPayload,
 } from './state.js';
 import { runOpenApiImport } from '../openapi/run-import.js';
+import { runPlaywrightTests } from '../testing/run-tests.js';
+import { resolveReportPaths } from '../testing/report-paths.js';
+import { createRunSession, getRunSession, stopRunSession } from '../testing/run-sessions.js';
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const CONFIG_STUDIO_DIST_DIR = resolve(MODULE_DIR, '../../../../dist/config-studio');
@@ -163,6 +166,86 @@ async function handleRequest(
     return;
   }
 
+  if (req.method === 'POST' && url.pathname === '/api/run') {
+    const payload = await readJsonBody(req) as {
+      env?: string;
+      tag?: string;
+      retry?: string | number;
+      trace?: boolean;
+      headed?: boolean;
+      workers?: string | number;
+    };
+
+    const result = await runPlaywrightTests({
+      env: payload.env ? String(payload.env).trim() : undefined,
+      tag: payload.tag ? String(payload.tag).trim() : undefined,
+      retry: payload.retry ?? '0',
+      trace: payload.trace === true,
+      headed: payload.headed === true,
+      workers: payload.workers,
+    });
+
+    sendJson(res, 200, {
+      ...result,
+      report: {
+        ...result.report,
+        reportUrl: result.report.available ? result.report.reportUrl : '',
+      },
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/run/start') {
+    const payload = await readJsonBody(req) as {
+      env?: string;
+      tag?: string;
+      retry?: string | number;
+      trace?: boolean;
+      headed?: boolean;
+      workers?: string | number;
+    };
+
+    const session = await createRunSession({
+      env: payload.env ? String(payload.env).trim() : undefined,
+      tag: payload.tag ? String(payload.tag).trim() : undefined,
+      retry: payload.retry ?? '0',
+      trace: payload.trace === true,
+      headed: payload.headed === true,
+      workers: payload.workers,
+    });
+
+    sendJson(res, 200, session);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname.startsWith('/api/run/')) {
+    const match = url.pathname.match(/^\/api\/run\/([^/]+)\/stop$/);
+    if (match) {
+      const session = stopRunSession(match[1]);
+
+      if (!session) {
+        sendJson(res, 404, { error: 'Run session not found.' });
+        return;
+      }
+
+      sendJson(res, 200, session);
+      return;
+    }
+  }
+
+  if (req.method === 'GET' && url.pathname.startsWith('/api/run/')) {
+    const sessionId = url.pathname.replace('/api/run/', '').trim();
+    const session = sessionId ? getRunSession(sessionId) : null;
+
+    if (!session) {
+      sendJson(res, 404, { error: 'Run session not found.' });
+      return;
+    }
+
+    sendJson(res, 200, session);
+    return;
+  }
+
   if (req.method === 'GET' && url.pathname === '/favicon.ico') {
     if (await tryServeStaticAsset(url.pathname, res)) {
       return;
@@ -174,6 +257,18 @@ async function handleRequest(
   }
 
   if (req.method === 'GET' || req.method === 'HEAD') {
+    if (url.pathname === '/report-preview' || url.pathname === '/report-preview/') {
+      if (await tryServeReportAsset('/report-preview/index.html', res, req.method === 'HEAD')) {
+        return;
+      }
+    }
+
+    if (url.pathname.startsWith('/report-preview/')) {
+      if (await tryServeReportAsset(url.pathname, res, req.method === 'HEAD')) {
+        return;
+      }
+    }
+
     if (await tryServeStaticAsset(url.pathname, res, req.method === 'HEAD')) {
       return;
     }
@@ -237,6 +332,41 @@ async function tryServeStaticAsset(
     }
 
     const cacheControl = pathname.startsWith('/assets/')
+      ? 'public, max-age=31536000, immutable'
+      : 'no-store';
+
+    await serveFile(absolutePath, res, { headOnly, cacheControl });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function tryServeReportAsset(
+  pathname: string,
+  res: ServerResponse,
+  headOnly = false
+): Promise<boolean> {
+  const reportPaths = await resolveReportPaths();
+  const baseDir = reportPaths.htmlDir;
+  const relativePath = decodeURIComponent(pathname.replace(/^\/report-preview\/?/, '')) || 'index.html';
+
+  if (!existsSync(baseDir)) {
+    return false;
+  }
+
+  const absolutePath = resolve(baseDir, relativePath);
+  if (!isPathInsideDirectory(baseDir, absolutePath)) {
+    return false;
+  }
+
+  try {
+    const fileStat = await stat(absolutePath);
+    if (!fileStat.isFile()) {
+      return false;
+    }
+
+    const cacheControl = relativePath.startsWith('assets/')
       ? 'public, max-age=31536000, immutable'
       : 'no-store';
 

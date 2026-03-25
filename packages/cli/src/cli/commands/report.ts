@@ -2,12 +2,15 @@ import { Command } from 'commander';
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { resolveReportPaths } from '../../testing/report-paths.js';
 
 export const reportCommand = new Command('report')
   .description('Open the latest HTML test report')
-  .option('-d, --dir <dir>', 'Report directory', 'reports/html')
-  .action((options: { dir: string }) => {
-    const reportDir = resolve(process.cwd(), options.dir);
+  .option('-d, --dir <dir>', 'Report directory (defaults to config.reportDir/html when present)')
+  .action(async (options: { dir?: string }) => {
+    const reportDir = options.dir
+      ? resolve(process.cwd(), options.dir)
+      : (await resolveReportPaths()).htmlDir;
 
     if (!existsSync(reportDir)) {
       console.error(`\n❌ Report not found: ${reportDir}`);

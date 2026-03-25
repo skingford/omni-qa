@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import EnvironmentCard from './components/EnvironmentCard.vue'
 import NotificationCard from './components/NotificationCard.vue'
 import {
   bootstrapConfigStudioProject,
+  getConfigStudioRunSession,
   importConfigStudioSource,
   loadConfigStudioState,
   saveConfigStudioState,
+  startConfigStudioRunSession,
+  stopConfigStudioRunSession,
 } from './lib/api'
 import {
   buildSavePayload,
@@ -21,7 +24,9 @@ import type {
   BootstrapFormState,
   ConfigStudioImportResult,
   ConfigStudioPaths,
+  ConfigStudioRunSession,
   ConfigStudioState,
+  ReportPreviewState,
   StatusType,
   StudioFormState,
 } from './types'
@@ -30,6 +35,8 @@ const loading = ref(true)
 const saving = ref(false)
 const bootstrapping = ref(false)
 const importing = ref(false)
+const running = ref(false)
+const stoppingRun = ref(false)
 const studioMode = ref<ConfigStudioState['mode']>('editor')
 const form = ref<StudioFormState>(createEmptyForm())
 const bootstrap = ref<BootstrapFormState>(createBootstrapForm())
@@ -40,6 +47,16 @@ const importForm = ref({
   force: false,
 })
 const importResult = ref<ConfigStudioImportResult | null>(null)
+const runForm = ref({
+  env: '',
+  tag: '',
+  retry: '0',
+  trace: false,
+  headed: false,
+  workers: '',
+})
+const runSession = ref<ConfigStudioRunSession | null>(null)
+const reportState = ref<ReportPreviewState | null>(null)
 const paths = ref<ConfigStudioPaths>({
   configPath: '',
   envPath: '',
@@ -49,7 +66,27 @@ const status = ref<{ message: string; type: StatusType }>({
   type: 'info',
 })
 
-const isBusy = computed(() => loading.value || saving.value || bootstrapping.value || importing.value)
+const pageBusy = computed(
+  () =>
+    loading.value ||
+    saving.value ||
+    bootstrapping.value ||
+    importing.value ||
+    running.value ||
+    stoppingRun.value,
+)
+
+const runButtonDisabled = computed(
+  () =>
+    loading.value ||
+    saving.value ||
+    bootstrapping.value ||
+    importing.value ||
+    running.value ||
+    stoppingRun.value,
+)
+
+const canStopRun = computed(() => runSession.value?.status === 'running')
 
 const effectiveDefaultEnv = computed(() => {
   if (studioMode.value === 'bootstrap') {
@@ -93,8 +130,33 @@ const bootstrapCommandPreview = computed(() => {
   return command.join(' ')
 })
 
+const activeRunStatusLabel = computed(() => {
+  if (!runSession.value) {
+    return ''
+  }
+
+  if (runSession.value.status === 'running') {
+    return 'Live run in progress'
+  }
+
+  if (runSession.value.status === 'cancelled') {
+    return 'Latest run was cancelled'
+  }
+
+  return runSession.value.success ? 'Latest run passed' : 'Latest run finished with failures'
+})
+
+let runPollTimer: number | undefined
+
 function setStatus(message: string, type: StatusType = 'success') {
   status.value = { message, type }
+}
+
+function clearRunPollTimer() {
+  if (runPollTimer !== undefined) {
+    window.clearTimeout(runPollTimer)
+    runPollTimer = undefined
+  }
 }
 
 function applyState(payload: ConfigStudioState) {
@@ -107,11 +169,15 @@ function applyState(payload: ConfigStudioState) {
       ...payload.bootstrap,
     }
     form.value = createEmptyForm()
+    reportState.value = null
+    runSession.value = null
     return
   }
 
   form.value = toStudioForm(payload)
   importForm.value.outDir = payload.config.testDir || 'tests/api'
+  runForm.value.env = payload.config.defaultEnv || Object.keys(payload.config.envs ?? {})[0] || ''
+  reportState.value = payload.report
 }
 
 async function fetchState(isReload = false) {
@@ -240,8 +306,129 @@ async function importFromSource() {
   }
 }
 
+async function runTests() {
+  const env = runForm.value.env.trim()
+
+  clearRunPollTimer()
+  running.value = true
+  stoppingRun.value = false
+  setStatus('Starting Playwright run...', 'info')
+
+  try {
+    runSession.value = await startConfigStudioRunSession({
+      env: env || undefined,
+      tag: runForm.value.tag.trim() || undefined,
+      retry: runForm.value.retry,
+      trace: runForm.value.trace,
+      headed: runForm.value.headed,
+      workers: runForm.value.workers.trim() || undefined,
+    })
+
+    if (runSession.value.report) {
+      reportState.value = runSession.value.report
+    }
+
+    if (runSession.value.status === 'running') {
+      setStatus('Playwright run started. Streaming live output...', 'info')
+      scheduleRunPoll(runSession.value.id)
+      return
+    }
+
+    finalizeRunSession(runSession.value)
+  } catch (error) {
+    clearRunPollTimer()
+    setStatus(error instanceof Error ? error.message : String(error), 'error')
+    running.value = false
+    stoppingRun.value = false
+  } finally {
+    if (!runSession.value || runSession.value.status !== 'running') {
+      running.value = false
+    }
+  }
+}
+
+async function stopActiveRun() {
+  if (!runSession.value || runSession.value.status !== 'running') {
+    return
+  }
+
+  stoppingRun.value = true
+  setStatus('Stopping Playwright run...', 'info')
+
+  try {
+    const snapshot = await stopConfigStudioRunSession(runSession.value.id)
+    runSession.value = snapshot
+
+    if (snapshot.report) {
+      reportState.value = snapshot.report
+    }
+
+    if (snapshot.status === 'running') {
+      scheduleRunPoll(snapshot.id)
+      return
+    }
+
+    finalizeRunSession(snapshot)
+  } catch (error) {
+    stoppingRun.value = false
+    setStatus(error instanceof Error ? error.message : String(error), 'error')
+  }
+}
+
+function scheduleRunPoll(sessionId: string) {
+  clearRunPollTimer()
+  runPollTimer = window.setTimeout(() => {
+    void pollRunSession(sessionId)
+  }, 800)
+}
+
+async function pollRunSession(sessionId: string) {
+  try {
+    const snapshot = await getConfigStudioRunSession(sessionId)
+    runSession.value = snapshot
+
+    if (snapshot.report) {
+      reportState.value = snapshot.report
+    }
+
+    if (snapshot.status === 'running') {
+      scheduleRunPoll(sessionId)
+      return
+    }
+
+    finalizeRunSession(snapshot)
+  } catch (error) {
+    clearRunPollTimer()
+    running.value = false
+    stoppingRun.value = false
+    setStatus(error instanceof Error ? error.message : String(error), 'error')
+  }
+}
+
+function finalizeRunSession(session: ConfigStudioRunSession) {
+  clearRunPollTimer()
+  running.value = false
+  stoppingRun.value = false
+  setStatus(
+    session.status === 'cancelled'
+      ? 'Test run cancelled.'
+      : session.success
+        ? 'Test run finished successfully.'
+        : `Test run finished with exit code ${session.exitCode ?? 1}.`,
+    session.status === 'cancelled'
+      ? 'info'
+      : session.success
+        ? 'success'
+        : 'error',
+  )
+}
+
 onMounted(() => {
   void fetchState(false)
+})
+
+onBeforeUnmount(() => {
+  clearRunPollTimer()
 })
 </script>
 
@@ -268,11 +455,11 @@ onMounted(() => {
     </section>
 
     <div class="page-actions">
-      <button class="secondary" :disabled="isBusy" @click="fetchState(true)">Reload from disk</button>
+      <button class="secondary" :disabled="pageBusy" @click="fetchState(true)">Reload from disk</button>
       <button
         v-if="studioMode === 'bootstrap'"
         class="primary"
-        :disabled="isBusy"
+        :disabled="pageBusy"
         @click="bootstrapProject"
       >
         {{ bootstrapping ? 'Creating project...' : 'Create starter project' }}
@@ -280,7 +467,7 @@ onMounted(() => {
       <button
         v-else
         class="primary"
-        :disabled="isBusy"
+        :disabled="pageBusy"
         @click="saveState"
       >
         {{ saving ? 'Saving...' : 'Save configuration' }}
@@ -561,7 +748,7 @@ onMounted(() => {
                 </div>
               </label>
 
-              <button class="primary" :disabled="isBusy" @click="importFromSource">
+              <button class="primary" :disabled="pageBusy" @click="importFromSource">
                 {{ importing ? 'Generating tests...' : 'Import and generate tests' }}
               </button>
 
@@ -599,6 +786,110 @@ onMounted(() => {
                   >
                     {{ file }}
                   </code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <span class="section-title">Run</span>
+            <h2>Execute tests and inspect the report</h2>
+            <div class="stack">
+              <div class="grid two">
+                <div class="field">
+                  <label for="run-env">Environment</label>
+                  <select id="run-env" v-model="runForm.env">
+                    <option
+                      v-for="env in form.envs"
+                      :key="`${env.id}-run`"
+                      :value="env.name"
+                    >
+                      {{ env.name || 'env' }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="run-tag">Tag filter</label>
+                  <input id="run-tag" v-model="runForm.tag" placeholder="@pet" />
+                </div>
+              </div>
+
+              <div class="grid three">
+                <div class="field">
+                  <label for="run-retry">Retries</label>
+                  <input id="run-retry" v-model="runForm.retry" type="number" min="0" />
+                </div>
+
+                <div class="field">
+                  <label for="run-workers">Workers</label>
+                  <input id="run-workers" v-model="runForm.workers" type="number" min="1" placeholder="auto" />
+                </div>
+
+                <div class="toggle-stack">
+                  <label class="toggle-card compact">
+                    <input v-model="runForm.trace" type="checkbox" />
+                    <div>
+                      <strong>Trace</strong>
+                      <span>Set <code>TRACE=on</code> for this run.</span>
+                    </div>
+                  </label>
+
+                  <label class="toggle-card compact">
+                    <input v-model="runForm.headed" type="checkbox" />
+                    <div>
+                      <strong>Headed</strong>
+                      <span>Use headed mode for debugging.</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="run-actions">
+                <button class="primary" :disabled="runButtonDisabled" @click="runTests">
+                  {{ running ? 'Streaming live run...' : 'Run Playwright tests' }}
+                </button>
+                <button
+                  v-if="canStopRun"
+                  class="secondary"
+                  :disabled="stoppingRun"
+                  @click="stopActiveRun"
+                >
+                  {{ stoppingRun ? 'Stopping run...' : 'Stop current run' }}
+                </button>
+                <a
+                  v-if="reportState?.available && reportState.reportUrl"
+                  class="button-link"
+                  :href="reportState.reportUrl"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open latest HTML report
+                </a>
+              </div>
+
+              <div v-if="runSession" class="result-card">
+                <div class="result-summary">
+                  <strong>{{ activeRunStatusLabel }}</strong>
+                  <span>
+                    <template v-if="runSession.exitCode !== null">
+                      Exit {{ runSession.exitCode }} ·
+                    </template>
+                    {{ Math.round(runSession.durationMs / 100) / 10 }}s ·
+                    <code>{{ runSession.command }}</code>
+                  </span>
+                </div>
+
+                <div class="checklist compact">
+                  <div><strong>Report directory</strong></div>
+                  <div><code>{{ reportState?.htmlDir || 'reports/html' }}</code></div>
+                </div>
+
+                <div v-if="runSession.output" class="result-list">
+                  <div class="section-title">
+                    {{ runSession.status === 'running' ? 'Live output' : 'Output' }}
+                  </div>
+                  <pre class="log-output">{{ runSession.output }}</pre>
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { execSync } from 'node:child_process';
+import { runPlaywrightTests } from '../../testing/run-tests.js';
 
 export const runCommand = new Command('run')
   .description('Run API tests with Playwright')
@@ -19,46 +19,27 @@ export const runCommand = new Command('run')
       workers?: string;
     }) => {
       try {
-        const args: string[] = ['bunx', 'playwright', 'test'];
-
-        // Environment
-        const envVars: Record<string, string> = {};
-        if (options.env) {
-          envVars.OMNI_ENV = options.env;
-        }
-
-        // Tag filter
-        if (options.tag) {
-          args.push('--grep', options.tag);
-        }
-
-        // Retry
-        if (options.retry !== '0') {
-          args.push('--retries', options.retry);
-        }
-
-        // Trace
-        if (options.trace) {
-          envVars.TRACE = 'on';
-        }
-
-        // Workers
-        if (options.workers) {
-          args.push('--workers', options.workers);
-        }
-
-        const command = args.join(' ');
-
         console.log(`\n🚀 Running tests...\n`);
-        console.log(`  Command: ${command}\n`);
-
-        execSync(command, {
-          stdio: 'inherit',
-          cwd: process.cwd(),
-          env: { ...process.env, ...envVars },
+        const result = await runPlaywrightTests({
+          env: options.env,
+          tag: options.tag,
+          retry: options.retry,
+          trace: options.trace,
+          headed: options.headed,
+          workers: options.workers,
+          streamOutput: true,
         });
+
+        console.log(`\n  Command: ${result.command}\n`);
+
+        if (result.report.available) {
+          console.log(`📊 HTML report ready at ${result.report.htmlDir}\n`);
+        }
+
+        if (!result.success) {
+          process.exit(result.exitCode || 1);
+        }
       } catch {
-        // Playwright exits with non-zero on test failures; that's expected
         process.exit(1);
       }
     }

@@ -65,11 +65,22 @@ export interface BootstrapFormState {
   createEnvFile: boolean
 }
 
+export interface ReportPreviewState {
+  rootDir: string
+  htmlDir: string
+  htmlIndexPath: string
+  jsonPath: string
+  available: boolean
+  jsonExists: boolean
+  reportUrl: string
+}
+
 export interface ConfigStudioEditorState {
   mode: 'editor'
   config: OmniQAConfigPayload
   envText: string
   paths: ConfigStudioPaths
+  report: ReportPreviewState
 }
 
 export interface ConfigStudioBootstrapState {
@@ -106,6 +117,37 @@ export interface ConfigStudioImportResult {
     endpoints: number
   }>
   generatedFiles: string[]
+}
+
+export interface ConfigStudioRunPayload {
+  env?: string
+  tag?: string
+  retry: string
+  trace: boolean
+  headed: boolean
+  workers?: string
+}
+
+export interface ConfigStudioRunResult {
+  command: string
+  success: boolean
+  exitCode: number
+  durationMs: number
+  output: string
+  report: ReportPreviewState
+}
+
+export interface ConfigStudioRunSession {
+  id: string
+  command: string
+  status: 'running' | 'completed' | 'failed' | 'cancelled'
+  success: boolean | null
+  exitCode: number | null
+  durationMs: number
+  startedAt: string
+  completedAt: string | null
+  output: string
+  report: ReportPreviewState | null
 }
 
 export interface StudioFormState {
