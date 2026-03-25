@@ -1,0 +1,21 @@
+{
+  "name": "@omni-qa/cli",
+  "version": "1.0.0",
+  "description": "omni-qa CLI and backend package",
+  "type": "module",
+  "bin": {
+    "omni-qa": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "bun src/cli/index.ts"
+  },
+  "dependencies": {
+    "@omni-qa/core": "workspace:*",
+    "commander": "^14.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  }
+}

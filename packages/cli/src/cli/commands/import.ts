@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { resolve } from 'node:path';
-import { parseOpenAPI, groupEndpoints } from '../../openapi/parser.js';
-import { generateTestFiles } from '../../generator/index.js';
+import { parseOpenAPI, groupEndpoints } from '@omni-qa/core/openapi/parser';
+import { generateTestFiles } from '@omni-qa/core/generator';
 
 export const importCommand = new Command('import')
   .description('Import OpenAPI document and generate test files')
@@ -37,8 +37,9 @@ export const importCommand = new Command('import')
       console.log(`\n✅ Generated ${files.length} test file(s)`);
       console.log('\nNext steps:');
       console.log('  1. Review generated files in', options.out);
-      console.log('  2. Configure omni-qa.config.ts (environment, auth)');
-      console.log('  3. Run tests: omni-qa run --env dev\n');
+      console.log('  2. If needed, scaffold local config with: omni-qa init');
+      console.log('  3. Configure omni-qa.config.ts (environment, auth)');
+      console.log('  4. Run tests: omni-qa run --env dev\n');
     } catch (err) {
       console.error(
         '\n❌ Import failed:',

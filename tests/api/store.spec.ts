@@ -1,4 +1,4 @@
-import { test, expect } from '../../src/fixtures/index.js';
+import { test, expect } from '@omni-qa/core/testing';
 
 /**
  * Auto-generated API tests for: store

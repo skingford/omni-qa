@@ -19,7 +19,7 @@ export const runCommand = new Command('run')
       workers?: string;
     }) => {
       try {
-        const args: string[] = ['npx', 'playwright', 'test'];
+        const args: string[] = ['bunx', 'playwright', 'test'];
 
         // Environment
         const envVars: Record<string, string> = {};
@@ -47,11 +47,7 @@ export const runCommand = new Command('run')
           args.push('--workers', options.workers);
         }
 
-        const envStr = Object.entries(envVars)
-          .map(([k, v]) => `${k}=${v}`)
-          .join(' ');
-
-        const command = envStr ? `${envStr} ${args.join(' ')}` : args.join(' ');
+        const command = args.join(' ');
 
         console.log(`\n🚀 Running tests...\n`);
         console.log(`  Command: ${command}\n`);

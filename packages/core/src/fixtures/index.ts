@@ -15,7 +15,7 @@ type OmniQAFixtures = {
  * Extended Playwright test with omni-qa fixtures.
  *
  * Usage in test files:
- *   import { test, expect } from '../../src/fixtures/index.js';
+ *   import { test, expect } from '@omni-qa/core/testing';
  *
  *   test('GET /users', async ({ apiClient }) => {
  *     const res = await apiClient.get('/users');

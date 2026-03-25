@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 import type { OmniQAConfig } from './types.js';
 
@@ -65,12 +66,12 @@ export async function loadConfig(env?: string): Promise<OmniQAConfig> {
 
   if (!existsSync(configPath)) {
     throw new Error(
-      `Config file not found: ${configPath}\nRun "cp omni-qa.config.example.ts omni-qa.config.ts" to create one.`
+      `Config file not found: ${configPath}\nRun "omni-qa init" to scaffold one.`
     );
   }
 
-  // Use dynamic import for .ts config (requires tsx or ts-node)
-  const mod = await import(configPath);
+  // Import the user's TypeScript config through a file URL so Bun can load it reliably.
+  const mod = await import(pathToFileURL(configPath).href);
   const rawConfig: OmniQAConfig = mod.default ?? mod;
 
   // Determine active environment

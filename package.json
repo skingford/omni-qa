@@ -1,37 +1,26 @@
 {
   "name": "omni-qa",
+  "private": true,
   "version": "1.0.0",
   "description": "omni-qa - a universal API automation testing platform",
   "type": "module",
-  "bin": {
-    "omni-qa": "./dist/cli/index.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/cli/index.ts",
-    "test": "npx playwright test",
-    "report": "npx playwright show-report reports/html"
-  },
-  "keywords": [
-    "api-testing",
-    "playwright",
-    "openapi",
-    "automation"
+  "packageManager": "bun@1.3.6",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "@apidevtools/swagger-parser": "^12.1.0",
-    "@playwright/test": "^1.58.2",
-    "commander": "^14.0.3",
-    "dotenv": "^17.3.1",
-    "handlebars": "^4.7.8",
-    "nodemailer": "^8.0.3",
-    "openapi-types": "^12.1.3"
+  "scripts": {
+    "build": "bun run build:config-studio && bun run build:cli",
+    "build:cli": "bun run build:core && bun --filter @omni-qa/cli build",
+    "build:core": "bun --filter @omni-qa/core build",
+    "build:config-studio": "bun --filter @omni-qa/config-studio build",
+    "dev": "bun run build:core && bun ./packages/cli/src/cli/index.ts",
+    "dev:config-studio": "bun --filter @omni-qa/config-studio dev",
+    "preview:config-studio": "bun --filter @omni-qa/config-studio preview",
+    "test": "bun run build:core && bunx playwright test",
+    "report": "bunx playwright show-report reports/html"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "@types/nodemailer": "^7.0.11",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "@omni-qa/core": "workspace:*"
   }
 }

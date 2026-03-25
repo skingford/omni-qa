@@ -1,29 +1,12 @@
-import { defineConfig } from '@playwright/test';
+import { createOmniPlaywrightConfig } from '@omni-qa/core';
 
 /**
- * Playwright configuration for omni-qa.
+ * Thin root wrapper around the shared omni-qa Playwright defaults.
  *
  * Environment is controlled via OMNI_ENV:
- *   OMNI_ENV=staging npx playwright test
+ *   OMNI_ENV=staging bunx playwright test
  *
  * Or via CLI:
  *   omni-qa run --env staging
  */
-export default defineConfig({
-  testDir: './tests/api',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-
-  reporter: [
-    ['list'],
-    ['html', { outputFolder: 'reports/html', open: 'never' }],
-    ['json', { outputFile: 'reports/results.json' }],
-  ],
-
-  use: {
-    trace: process.env.TRACE === 'on' ? 'on' : 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
-});
+export default createOmniPlaywrightConfig();

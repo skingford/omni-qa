@@ -17,7 +17,7 @@ export const reportCommand = new Command('report')
 
     console.log(`\n📊 Opening report: ${reportDir}\n`);
 
-    execSync(`npx playwright show-report ${reportDir}`, {
+    execSync(`bunx playwright show-report ${reportDir}`, {
       stdio: 'inherit',
       cwd: process.cwd(),
     });

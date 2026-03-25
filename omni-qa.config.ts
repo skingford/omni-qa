@@ -1,4 +1,4 @@
-import type { OmniQAConfig } from './src/config/types.js';
+import type { OmniQAConfig } from '@omni-qa/core';
 
 const config: OmniQAConfig = {
   defaultEnv: 'dev',
