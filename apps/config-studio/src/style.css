@@ -7,6 +7,7 @@
   --muted: #6a5a46;
   --primary: #9f4f2f;
   --primary-strong: #7b371f;
+  --info: #285f8f;
   --success: #1f7a4d;
   --danger: #9f2f3d;
   --shadow: 0 18px 40px rgba(63, 42, 18, 0.12);
@@ -33,6 +34,12 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
 }
 
 .shell {
@@ -158,9 +165,16 @@ main {
   align-items: start;
 }
 
-main > .panel:last-child {
+.side-stack {
+  display: grid;
+  gap: 18px;
+}
+
+main > .panel:last-child,
+.side-stack {
   position: sticky;
   top: 20px;
+  align-self: start;
 }
 
 .grid {
@@ -217,11 +231,16 @@ textarea:focus {
 }
 
 .env-card,
-.notify-card {
+.notify-card,
+.toggle-card {
   background: linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(250, 244, 234, 0.95));
   border: 1px solid rgba(112, 79, 38, 0.16);
   border-radius: 18px;
   padding: 18px;
+}
+
+.env-card,
+.notify-card {
   display: grid;
   gap: 14px;
 }
@@ -291,10 +310,100 @@ button.ghost {
   color: var(--success);
 }
 
+.status.info {
+  background: rgba(40, 95, 143, 0.1);
+  border-color: rgba(40, 95, 143, 0.22);
+  color: var(--info);
+}
+
 .status.error {
   background: rgba(159, 47, 61, 0.1);
   border-color: rgba(159, 47, 61, 0.22);
   color: var(--danger);
+}
+
+.toggle-grid,
+.checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.toggle-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.toggle-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.toggle-card.compact {
+  padding: 14px 16px;
+}
+
+.toggle-card strong,
+.checklist strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.toggle-card span,
+.checklist {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.checklist.compact {
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.result-card,
+.result-list {
+  display: grid;
+  gap: 12px;
+}
+
+.result-card {
+  border-top: 1px solid rgba(112, 79, 38, 0.14);
+  padding-top: 14px;
+}
+
+.result-summary {
+  display: grid;
+  gap: 4px;
+}
+
+.result-summary span {
+  color: var(--muted);
+}
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill,
+.file-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(112, 79, 38, 0.18);
+  background: rgba(255, 251, 244, 0.92);
+  color: var(--text);
+}
+
+.pill {
+  padding: 7px 12px;
+  font-size: 0.92rem;
+}
+
+.file-chip {
+  display: block;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .command-list {
@@ -328,7 +437,8 @@ button.ghost {
     margin-top: 10px;
   }
 
-  main > .panel:last-child {
+  main > .panel:last-child,
+  .side-stack {
     position: static;
   }
 }

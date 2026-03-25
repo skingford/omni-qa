@@ -1,4 +1,10 @@
-import type { ConfigStudioSavePayload, ConfigStudioState } from '../types'
+import type {
+  ConfigStudioBootstrapPayload,
+  ConfigStudioImportPayload,
+  ConfigStudioImportResult,
+  ConfigStudioSavePayload,
+  ConfigStudioState,
+} from '../types'
 
 const apiBaseUrl = (import.meta.env.VITE_CONFIG_STUDIO_API_BASE_URL || '').replace(/\/$/, '')
 
@@ -27,4 +33,32 @@ export async function saveConfigStudioState(
   })
 
   return parseJsonResponse<ConfigStudioState>(response)
+}
+
+export async function bootstrapConfigStudioProject(
+  payload: ConfigStudioBootstrapPayload,
+): Promise<ConfigStudioState> {
+  const response = await fetch(`${apiBaseUrl}/api/bootstrap`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseJsonResponse<ConfigStudioState>(response)
+}
+
+export async function importConfigStudioSource(
+  payload: ConfigStudioImportPayload,
+): Promise<ConfigStudioImportResult> {
+  const response = await fetch(`${apiBaseUrl}/api/import`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseJsonResponse<ConfigStudioImportResult>(response)
 }

@@ -104,6 +104,7 @@ Open a local browser-based config studio for editing:
 - auth mode (none / static headers / login to fetch token)
 - notification channels (DingTalk / email)
 - `.env` secrets and placeholders
+- first-run bootstrap when `omni-qa.config.ts` does not exist yet
 
 ```bash
 # Open the studio on the default port
@@ -112,6 +113,8 @@ omni-qa config
 # Use a custom port without auto-opening the browser
 omni-qa config --port 4321 --no-open
 ```
+
+If the current workspace does not have `/Users/kingford/workspace/github.com/omni-qa/omni-qa.config.ts` yet, the studio now opens in a bootstrap flow so you can visually choose the default environment, base URL, auth mode, notifications, and whether to create `.env`.
 
 For frontend-only development, the config studio now lives in `/Users/kingford/workspace/github.com/omni-qa/apps/config-studio`:
 

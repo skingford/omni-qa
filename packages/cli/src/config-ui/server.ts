@@ -6,10 +6,13 @@ import type { AddressInfo } from 'node:net';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  bootstrapEditorState,
   loadEditorState,
   saveEditorState,
-  type ConfigEditorState,
+  type BootstrapOptions,
+  type SaveEditorPayload,
 } from './state.js';
+import { runOpenApiImport } from '../openapi/run-import.js';
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const CONFIG_STUDIO_DIST_DIR = resolve(MODULE_DIR, '../../../../dist/config-studio');
@@ -117,8 +120,46 @@ async function handleRequest(
 
   if (req.method === 'POST' && url.pathname === '/api/save') {
     const payload = await readJsonBody(req);
-    const nextState = await saveEditorState(payload as ConfigEditorState);
+    const nextState = await saveEditorState(payload as SaveEditorPayload);
     sendJson(res, 200, nextState);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/bootstrap') {
+    const payload = await readJsonBody(req);
+    const nextState = await bootstrapEditorState(payload as BootstrapOptions);
+    sendJson(res, 200, nextState);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/import') {
+    const payload = await readJsonBody(req) as {
+      source?: string;
+      outDir?: string;
+      tags?: string[];
+      force?: boolean;
+    };
+
+    const source = String(payload.source ?? '').trim();
+    const outDir = String(payload.outDir ?? '').trim();
+
+    if (!source) {
+      sendJson(res, 400, { error: 'OpenAPI source is required.' });
+      return;
+    }
+
+    if (!outDir) {
+      sendJson(res, 400, { error: 'Output directory is required.' });
+      return;
+    }
+
+    const result = await runOpenApiImport({
+      source,
+      outDir,
+      tags: Array.isArray(payload.tags) ? payload.tags : [],
+      force: payload.force === true,
+    });
+    sendJson(res, 200, result);
     return;
   }
 

@@ -1,7 +1,5 @@
 import { Command } from 'commander';
-import { resolve } from 'node:path';
-import { parseOpenAPI, groupEndpoints } from '@omni-qa/core/openapi/parser';
-import { generateTestFiles } from '@omni-qa/core/generator';
+import { runOpenApiImport } from '../../openapi/run-import.js';
 
 export const importCommand = new Command('import')
   .description('Import OpenAPI document and generate test files')
@@ -11,30 +9,24 @@ export const importCommand = new Command('import')
   .option('-f, --force', 'Overwrite existing generated files')
   .action(async (source: string, options: { out: string; tag?: string[]; force?: boolean }) => {
     try {
+      const outDir = options.out;
       console.log(`\n📄 Importing OpenAPI document: ${source}\n`);
 
-      // Parse
-      console.log('  Parsing...');
-      const api = await parseOpenAPI(source);
-      console.log(`  ✓ ${api.title} v${api.version}`);
-      console.log(`  ✓ Found ${api.endpoints.length} endpoints\n`);
-
-      // Group
-      const groups = groupEndpoints(api.endpoints);
-      console.log(`  Groups: ${groups.map((g) => `${g.name}(${g.endpoints.length})`).join(', ')}\n`);
-
-      // Generate
-      const outDir = resolve(process.cwd(), options.out);
-      console.log(`  Generating test files → ${outDir}\n`);
-
-      const files = await generateTestFiles(groups, {
-        source,
+      console.log('  Parsing and generating...');
+      const result = await runOpenApiImport({
         outDir,
-        filterTags: options.tag,
-        overwrite: options.force,
+        source,
+        tags: options.tag,
+        force: options.force,
       });
+      console.log(`  ✓ ${result.apiTitle} v${result.apiVersion}`);
+      console.log(`  ✓ Found ${result.endpointCount} endpoints`);
+      console.log(`  ✓ Output directory: ${result.outDir}`);
+      console.log(
+        `  ✓ Groups: ${result.groups.map((group) => `${group.name}(${group.endpoints})`).join(', ')}\n`,
+      );
 
-      console.log(`\n✅ Generated ${files.length} test file(s)`);
+      console.log(`\n✅ Generated ${result.generatedFiles.length} test file(s)`);
       console.log('\nNext steps:');
       console.log('  1. Review generated files in', options.out);
       console.log('  2. If needed, scaffold local config with: omni-qa init');

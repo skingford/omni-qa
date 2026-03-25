@@ -1,6 +1,7 @@
 import type {
+  BootstrapFormState,
   ConfigStudioSavePayload,
-  ConfigStudioState,
+  ConfigStudioEditorState,
   EnvFormItem,
   NotificationFormItem,
   StudioFormState,
@@ -22,6 +23,17 @@ export function createEmptyForm(): StudioFormState {
     envs: [],
     notifications: [],
     envText: '',
+  }
+}
+
+export function createBootstrapForm(): BootstrapFormState {
+  return {
+    defaultEnv: 'dev',
+    baseUrl: 'https://dev-api.example.com',
+    authMode: 'header',
+    includeDingtalk: true,
+    includeEmail: true,
+    createEnvFile: true,
   }
 }
 
@@ -96,7 +108,7 @@ function splitList(value: string): string[] {
     .filter(Boolean)
 }
 
-function createEnvForm(name: string, env: ConfigStudioState['config']['envs'][string]): EnvFormItem {
+function createEnvForm(name: string, env: ConfigStudioEditorState['config']['envs'][string]): EnvFormItem {
   const authType = env.auth?.type ?? 'none'
   const login = authType === 'bearer' ? env.auth.login : undefined
 
@@ -115,7 +127,7 @@ function createEnvForm(name: string, env: ConfigStudioState['config']['envs'][st
 }
 
 function createNotificationForm(
-  notify: NonNullable<ConfigStudioState['config']['notify']>[number],
+  notify: NonNullable<ConfigStudioEditorState['config']['notify']>[number],
 ): NotificationFormItem {
   if (notify.type === 'email') {
     return {
@@ -144,7 +156,7 @@ function createNotificationForm(
   }
 }
 
-export function toStudioForm(state: ConfigStudioState): StudioFormState {
+export function toStudioForm(state: ConfigStudioEditorState): StudioFormState {
   const envEntries = Object.entries(state.config.envs ?? {})
 
   return {

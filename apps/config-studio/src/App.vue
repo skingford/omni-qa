@@ -2,30 +2,60 @@
 import { computed, onMounted, ref } from 'vue'
 import EnvironmentCard from './components/EnvironmentCard.vue'
 import NotificationCard from './components/NotificationCard.vue'
-import { loadConfigStudioState, saveConfigStudioState } from './lib/api'
+import {
+  bootstrapConfigStudioProject,
+  importConfigStudioSource,
+  loadConfigStudioState,
+  saveConfigStudioState,
+} from './lib/api'
 import {
   buildSavePayload,
   createBlankEnvironment,
   createBlankNotification,
+  createBootstrapForm,
   createEmptyForm,
   createSuggestedEnvName,
   toStudioForm,
 } from './lib/config-form'
-import type { ConfigStudioPaths, StatusType, StudioFormState } from './types'
+import type {
+  BootstrapFormState,
+  ConfigStudioImportResult,
+  ConfigStudioPaths,
+  ConfigStudioState,
+  StatusType,
+  StudioFormState,
+} from './types'
 
 const loading = ref(true)
 const saving = ref(false)
+const bootstrapping = ref(false)
+const importing = ref(false)
+const studioMode = ref<ConfigStudioState['mode']>('editor')
 const form = ref<StudioFormState>(createEmptyForm())
+const bootstrap = ref<BootstrapFormState>(createBootstrapForm())
+const importForm = ref({
+  source: '',
+  outDir: 'tests/api',
+  tagsText: '',
+  force: false,
+})
+const importResult = ref<ConfigStudioImportResult | null>(null)
 const paths = ref<ConfigStudioPaths>({
   configPath: '',
   envPath: '',
 })
 const status = ref<{ message: string; type: StatusType }>({
   message: '',
-  type: 'success',
+  type: 'info',
 })
 
+const isBusy = computed(() => loading.value || saving.value || bootstrapping.value || importing.value)
+
 const effectiveDefaultEnv = computed(() => {
+  if (studioMode.value === 'bootstrap') {
+    return bootstrap.value.defaultEnv.trim() || 'dev'
+  }
+
   const configured = form.value.defaultEnv.trim()
   if (configured) {
     return configured
@@ -33,23 +63,73 @@ const effectiveDefaultEnv = computed(() => {
   return form.value.envs[0]?.name.trim() || 'dev'
 })
 
+const bootstrapCommandPreview = computed(() => {
+  const command = ['omni-qa init']
+
+  if (bootstrap.value.defaultEnv.trim() && bootstrap.value.defaultEnv.trim() !== 'dev') {
+    command.push(`--default-env ${bootstrap.value.defaultEnv.trim()}`)
+  }
+
+  if (bootstrap.value.baseUrl.trim()) {
+    command.push(`--base-url ${bootstrap.value.baseUrl.trim()}`)
+  }
+
+  if (bootstrap.value.authMode !== 'header') {
+    command.push(`--auth ${bootstrap.value.authMode}`)
+  }
+
+  if (!bootstrap.value.includeDingtalk) {
+    command.push('--no-dingtalk')
+  }
+
+  if (!bootstrap.value.includeEmail) {
+    command.push('--no-email')
+  }
+
+  if (!bootstrap.value.createEnvFile) {
+    command.push('--skip-env')
+  }
+
+  return command.join(' ')
+})
+
 function setStatus(message: string, type: StatusType = 'success') {
   status.value = { message, type }
 }
 
-function applyState(payload: Awaited<ReturnType<typeof loadConfigStudioState>>) {
-  form.value = toStudioForm(payload)
+function applyState(payload: ConfigStudioState) {
+  studioMode.value = payload.mode
   paths.value = payload.paths ?? { configPath: '', envPath: '' }
+
+  if (payload.mode === 'bootstrap') {
+    bootstrap.value = {
+      ...createBootstrapForm(),
+      ...payload.bootstrap,
+    }
+    form.value = createEmptyForm()
+    return
+  }
+
+  form.value = toStudioForm(payload)
+  importForm.value.outDir = payload.config.testDir || 'tests/api'
 }
 
 async function fetchState(isReload = false) {
   loading.value = true
-  setStatus(isReload ? 'Reloading configuration from disk...' : 'Loading configuration studio...')
+  setStatus(
+    isReload ? 'Reloading configuration from disk...' : 'Loading configuration studio...',
+    'info',
+  )
 
   try {
     const payload = await loadConfigStudioState()
     applyState(payload)
-    setStatus('Configuration loaded. Adjust the form and save when ready.', 'success')
+
+    if (payload.mode === 'bootstrap') {
+      setStatus('No config detected yet. Choose a starter setup and create the project files.', 'info')
+    } else {
+      setStatus('Configuration loaded. Adjust the form and save when ready.', 'success')
+    }
   } catch (error) {
     setStatus(error instanceof Error ? error.message : String(error), 'error')
   } finally {
@@ -80,9 +160,28 @@ function removeNotification(index: number) {
   form.value.notifications.splice(index, 1)
 }
 
+async function bootstrapProject() {
+  bootstrapping.value = true
+  setStatus('Creating starter project files...', 'info')
+
+  try {
+    const payload = await bootstrapConfigStudioProject({
+      ...bootstrap.value,
+      defaultEnv: bootstrap.value.defaultEnv.trim() || 'dev',
+      baseUrl: bootstrap.value.baseUrl.trim(),
+    })
+    applyState(payload)
+    setStatus('Starter files created. You can fine-tune them below and save anytime.', 'success')
+  } catch (error) {
+    setStatus(error instanceof Error ? error.message : String(error), 'error')
+  } finally {
+    bootstrapping.value = false
+  }
+}
+
 async function saveState() {
   saving.value = true
-  setStatus('Saving configuration...')
+  setStatus('Saving configuration...', 'info')
 
   try {
     const payload = await saveConfigStudioState(buildSavePayload(form.value))
@@ -92,6 +191,52 @@ async function saveState() {
     setStatus(error instanceof Error ? error.message : String(error), 'error')
   } finally {
     saving.value = false
+  }
+}
+
+function parseImportTags(value: string): string[] {
+  return Array.from(
+    new Set(
+      value
+        .split(/[,\n]/)
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    ),
+  )
+}
+
+async function importFromSource() {
+  const source = importForm.value.source.trim()
+  const outDir = importForm.value.outDir.trim()
+
+  if (!source) {
+    setStatus('Enter an OpenAPI URL or local file path before importing.', 'error')
+    return
+  }
+
+  if (!outDir) {
+    setStatus('Choose where generated test files should be written.', 'error')
+    return
+  }
+
+  importing.value = true
+  setStatus('Importing OpenAPI document and generating tests...', 'info')
+
+  try {
+    importResult.value = await importConfigStudioSource({
+      source,
+      outDir,
+      tags: parseImportTags(importForm.value.tagsText),
+      force: importForm.value.force,
+    })
+    setStatus(
+      `Imported ${importResult.value.apiTitle} and generated ${importResult.value.generatedFiles.length} test file(s).`,
+      'success',
+    )
+  } catch (error) {
+    setStatus(error instanceof Error ? error.message : String(error), 'error')
+  } finally {
+    importing.value = false
   }
 }
 
@@ -106,8 +251,8 @@ onMounted(() => {
       <div>
         <h1>omni-qa config studio</h1>
         <p>
-          Use this page to edit environments, auth flows, notifications, and secret placeholders
-          without hand-editing multiple files.
+          Use this page to bootstrap or edit environments, auth flows, notifications, and secret
+          placeholders without hand-editing multiple files.
         </p>
       </div>
       <div class="hero-meta">
@@ -123,8 +268,21 @@ onMounted(() => {
     </section>
 
     <div class="page-actions">
-      <button class="secondary" :disabled="loading || saving" @click="fetchState(true)">Reload from disk</button>
-      <button class="primary" :disabled="loading || saving" @click="saveState">
+      <button class="secondary" :disabled="isBusy" @click="fetchState(true)">Reload from disk</button>
+      <button
+        v-if="studioMode === 'bootstrap'"
+        class="primary"
+        :disabled="isBusy"
+        @click="bootstrapProject"
+      >
+        {{ bootstrapping ? 'Creating project...' : 'Create starter project' }}
+      </button>
+      <button
+        v-else
+        class="primary"
+        :disabled="isBusy"
+        @click="saveState"
+      >
         {{ saving ? 'Saving...' : 'Save configuration' }}
       </button>
     </div>
@@ -135,6 +293,114 @@ onMounted(() => {
 
     <main>
       <div v-if="loading" class="panel loading-note">Loading configuration studio...</div>
+
+      <template v-else-if="studioMode === 'bootstrap'">
+        <div class="panel">
+          <div class="toolbar">
+            <div>
+              <span class="section-title">Bootstrap</span>
+              <h2>Create your first omni-qa workspace files</h2>
+              <p>
+                Pick a sensible starting point, generate the files, then continue tweaking
+                everything in the editor.
+              </p>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="grid two">
+              <div class="field">
+                <label for="bootstrap-default-env">Default environment</label>
+                <input
+                  id="bootstrap-default-env"
+                  v-model="bootstrap.defaultEnv"
+                  placeholder="dev"
+                />
+              </div>
+              <div class="field">
+                <label for="bootstrap-base-url">Base URL</label>
+                <input
+                  id="bootstrap-base-url"
+                  v-model="bootstrap.baseUrl"
+                  placeholder="https://dev-api.example.com"
+                />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="bootstrap-auth">Authentication scaffold</label>
+              <select id="bootstrap-auth" v-model="bootstrap.authMode">
+                <option value="none">No auth</option>
+                <option value="header">Static auth headers</option>
+                <option value="bearer">Login and fetch bearer token</option>
+              </select>
+              <div class="hint">
+                This chooses which starter auth fields and .env placeholders get generated.
+              </div>
+            </div>
+
+            <div class="toggle-grid">
+              <label class="toggle-card">
+                <input v-model="bootstrap.includeDingtalk" type="checkbox" />
+                <div>
+                  <strong>Include DingTalk</strong>
+                  <span>Generate a webhook notification block and placeholder.</span>
+                </div>
+              </label>
+
+              <label class="toggle-card">
+                <input v-model="bootstrap.includeEmail" type="checkbox" />
+                <div>
+                  <strong>Include email</strong>
+                  <span>Generate SMTP notification config and env placeholders.</span>
+                </div>
+              </label>
+
+              <label class="toggle-card">
+                <input v-model="bootstrap.createEnvFile" type="checkbox" />
+                <div>
+                  <strong>Create local .env</strong>
+                  <span>Uncheck this if you only want `.env.example` at bootstrap time.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <span class="section-title">Preview</span>
+          <h2>What the studio will create</h2>
+          <div class="command-list">
+            <code>{{ bootstrapCommandPreview }}</code>
+          </div>
+
+          <div class="checklist">
+            <div><strong>Files</strong></div>
+            <div><code>omni-qa.config.ts</code>, <code>.env.example</code>, <code>playwright.config.ts</code></div>
+            <div><strong>Folders</strong></div>
+            <div><code>tests/api</code>, <code>reports</code></div>
+            <div><strong>Optional</strong></div>
+            <div>
+              <template v-if="bootstrap.createEnvFile">
+                Also creates <code>.env</code> if it is missing.
+              </template>
+              <template v-else>
+                Skips <code>.env</code> creation for now.
+              </template>
+            </div>
+          </div>
+
+          <div class="panel panel-embedded">
+            <span class="section-title">Then</span>
+            <h2>Next commands</h2>
+            <div class="command-list">
+              <code>bun run dev -- import https://your-api.example.com/openapi.json</code>
+              <code>bun run dev -- run --env {{ effectiveDefaultEnv }}</code>
+              <code>bun run dev -- report</code>
+            </div>
+          </div>
+        </div>
+      </template>
 
       <template v-else>
         <div class="panel">
@@ -251,13 +517,101 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="panel">
-          <span class="section-title">Runbook</span>
-          <h2>Next commands</h2>
-          <div class="command-list">
-            <code>bun run dev -- import https://your-api.example.com/openapi.json</code>
-            <code>bun run dev -- run --env {{ effectiveDefaultEnv }}</code>
-            <code>bun run dev -- report</code>
+        <div class="side-stack">
+          <div class="panel">
+            <span class="section-title">Import</span>
+            <h2>Generate tests from OpenAPI</h2>
+            <div class="stack">
+              <div class="field">
+                <label for="import-source">Source URL or file path</label>
+                <input
+                  id="import-source"
+                  v-model="importForm.source"
+                  placeholder="https://petstore3.swagger.io/api/v3/openapi.json"
+                />
+              </div>
+
+              <div class="field">
+                <label for="import-out-dir">Output directory</label>
+                <input
+                  id="import-out-dir"
+                  v-model="importForm.outDir"
+                  placeholder="tests/api"
+                />
+              </div>
+
+              <div class="field">
+                <label for="import-tags">Filter tags</label>
+                <textarea
+                  id="import-tags"
+                  v-model="importForm.tagsText"
+                  style="min-height: 96px;"
+                  placeholder="users, orders"
+                ></textarea>
+                <div class="hint">
+                  Optional. Separate multiple tags with commas or new lines.
+                </div>
+              </div>
+
+              <label class="toggle-card compact">
+                <input v-model="importForm.force" type="checkbox" />
+                <div>
+                  <strong>Overwrite generated files</strong>
+                  <span>Use this when you want to regenerate files that already exist.</span>
+                </div>
+              </label>
+
+              <button class="primary" :disabled="isBusy" @click="importFromSource">
+                {{ importing ? 'Generating tests...' : 'Import and generate tests' }}
+              </button>
+
+              <div v-if="importResult" class="result-card">
+                <div class="result-summary">
+                  <strong>{{ importResult.apiTitle }}</strong>
+                  <span>v{{ importResult.apiVersion }} · {{ importResult.endpointCount }} endpoints</span>
+                </div>
+                <div class="checklist compact">
+                  <div><strong>Output</strong></div>
+                  <div><code>{{ importResult.outDir }}</code></div>
+                  <div><strong>Generated</strong></div>
+                  <div>{{ importResult.generatedFiles.length }} file(s)</div>
+                </div>
+
+                <div v-if="importResult.groups.length" class="result-list">
+                  <div class="section-title">Groups</div>
+                  <div class="pill-list">
+                    <span
+                      v-for="group in importResult.groups"
+                      :key="group.name"
+                      class="pill"
+                    >
+                      {{ group.name }} ({{ group.endpoints }})
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="importResult.generatedFiles.length" class="result-list">
+                  <div class="section-title">Files</div>
+                  <code
+                    v-for="file in importResult.generatedFiles"
+                    :key="file"
+                    class="file-chip"
+                  >
+                    {{ file }}
+                  </code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <span class="section-title">Runbook</span>
+            <h2>Next commands</h2>
+            <div class="command-list">
+              <code>bun run dev -- import https://your-api.example.com/openapi.json</code>
+              <code>bun run dev -- run --env {{ effectiveDefaultEnv }}</code>
+              <code>bun run dev -- report</code>
+            </div>
           </div>
         </div>
       </template>

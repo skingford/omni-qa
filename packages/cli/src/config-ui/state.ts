@@ -12,18 +12,48 @@ import type {
   OmniQAConfig,
   StaticHeaderAuth,
 } from '@omni-qa/core';
+import {
+  getDefaultInitTemplateOptions,
+  initializeProjectScaffold,
+} from '../scaffold/init-project.js';
+import type { InitAuthMode } from '../cli/templates/init.js';
 
 const CONFIG_FILE = 'omni-qa.config.ts';
 const ENV_FILE = '.env';
 const ENV_EXAMPLE_FILE = '.env.example';
 
-export interface ConfigEditorState {
+interface EditorPaths {
+  configPath: string;
+  envPath: string;
+}
+
+export interface BootstrapState {
+  mode: 'bootstrap';
+  bootstrap: BootstrapOptions;
+  paths: EditorPaths;
+}
+
+export interface LoadedEditorState {
+  mode: 'editor';
   config: OmniQAConfig;
   envText: string;
-  paths: {
-    configPath: string;
-    envPath: string;
-  };
+  paths: EditorPaths;
+}
+
+export type ConfigEditorState = BootstrapState | LoadedEditorState;
+
+export interface SaveEditorPayload {
+  config: OmniQAConfig;
+  envText: string;
+}
+
+export interface BootstrapOptions {
+  defaultEnv: string;
+  baseUrl: string;
+  authMode: InitAuthMode;
+  includeDingtalk: boolean;
+  includeEmail: boolean;
+  createEnvFile: boolean;
 }
 
 export function getEditorPaths(cwd = process.cwd()) {
@@ -38,9 +68,19 @@ export async function loadEditorState(cwd = process.cwd()): Promise<ConfigEditor
   const { configPath, envPath, envExamplePath } = getEditorPaths(cwd);
 
   if (!existsSync(configPath)) {
-    throw new Error(
-      `Config file not found: ${configPath}. Create it first with "omni-qa init".`
-    );
+    const defaults = getDefaultInitTemplateOptions();
+    return {
+      mode: 'bootstrap',
+      bootstrap: {
+        defaultEnv: defaults.defaultEnv,
+        baseUrl: defaults.baseUrl,
+        authMode: defaults.authMode,
+        includeDingtalk: defaults.includeDingtalk,
+        includeEmail: defaults.includeEmail,
+        createEnvFile: true,
+      },
+      paths: { configPath, envPath },
+    };
   }
 
   const rawConfig = await importConfig(configPath);
@@ -48,6 +88,7 @@ export async function loadEditorState(cwd = process.cwd()): Promise<ConfigEditor
   const envText = existsSync(envSourcePath) ? await readFile(envSourcePath, 'utf8') : '';
 
   return {
+    mode: 'editor',
     config: normalizeConfig(rawConfig),
     envText,
     paths: { configPath, envPath },
@@ -55,9 +96,9 @@ export async function loadEditorState(cwd = process.cwd()): Promise<ConfigEditor
 }
 
 export async function saveEditorState(
-  state: ConfigEditorState,
+  state: SaveEditorPayload,
   cwd = process.cwd()
-): Promise<ConfigEditorState> {
+): Promise<LoadedEditorState> {
   const { configPath, envPath } = getEditorPaths(cwd);
   const config = normalizeConfig(state.config);
 
@@ -67,10 +108,39 @@ export async function saveEditorState(
   await writeFile(envPath, normalizeEnvText(state.envText), 'utf8');
 
   return {
+    mode: 'editor',
     config,
     envText: normalizeEnvText(state.envText),
     paths: { configPath, envPath },
   };
+}
+
+export async function bootstrapEditorState(
+  options: BootstrapOptions,
+  cwd = process.cwd(),
+): Promise<LoadedEditorState> {
+  const { configPath } = getEditorPaths(cwd);
+
+  if (existsSync(configPath)) {
+    throw new Error('Config file already exists. Reload the studio and edit the existing project instead.');
+  }
+
+  await initializeProjectScaffold({
+    cwd,
+    defaultEnv: options.defaultEnv,
+    baseUrl: options.baseUrl,
+    authMode: options.authMode,
+    includeDingtalk: options.includeDingtalk,
+    includeEmail: options.includeEmail,
+    createEnvFile: options.createEnvFile,
+  });
+
+  const state = await loadEditorState(cwd);
+  if (state.mode !== 'editor') {
+    throw new Error('Project scaffold was created, but the editor could not load it afterwards.');
+  }
+
+  return state;
 }
 
 async function importConfig(configPath: string): Promise<OmniQAConfig> {

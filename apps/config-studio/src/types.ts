@@ -3,6 +3,8 @@ export interface ConfigStudioPaths {
   envPath: string
 }
 
+export type InitAuthMode = 'none' | 'header' | 'bearer'
+
 export interface OmniQAConfigPayload {
   defaultEnv: string
   envs: Record<string, EnvConfigPayload>
@@ -54,15 +56,56 @@ export interface EmailNotifyPayload {
   to: string[]
 }
 
-export interface ConfigStudioState {
+export interface BootstrapFormState {
+  defaultEnv: string
+  baseUrl: string
+  authMode: InitAuthMode
+  includeDingtalk: boolean
+  includeEmail: boolean
+  createEnvFile: boolean
+}
+
+export interface ConfigStudioEditorState {
+  mode: 'editor'
   config: OmniQAConfigPayload
   envText: string
   paths: ConfigStudioPaths
 }
 
+export interface ConfigStudioBootstrapState {
+  mode: 'bootstrap'
+  bootstrap: BootstrapFormState
+  paths: ConfigStudioPaths
+}
+
+export type ConfigStudioState = ConfigStudioEditorState | ConfigStudioBootstrapState
+
 export interface ConfigStudioSavePayload {
   config: OmniQAConfigPayload
   envText: string
+}
+
+export interface ConfigStudioBootstrapPayload extends BootstrapFormState {}
+
+export interface ConfigStudioImportPayload {
+  source: string
+  outDir: string
+  tags: string[]
+  force: boolean
+}
+
+export interface ConfigStudioImportResult {
+  source: string
+  apiTitle: string
+  apiVersion: string
+  endpointCount: number
+  outDir: string
+  tags: string[]
+  groups: Array<{
+    name: string
+    endpoints: number
+  }>
+  generatedFiles: string[]
 }
 
 export interface StudioFormState {
@@ -80,7 +123,7 @@ export interface EnvFormItem {
   name: string
   baseURL: string
   headersText: string
-  authType: 'none' | 'header' | 'bearer'
+  authType: InitAuthMode
   authHeadersText: string
   loginUrl: string
   loginMethod: 'POST' | 'GET'
@@ -100,4 +143,4 @@ export interface NotificationFormItem {
   smtpPass: string
 }
 
-export type StatusType = 'success' | 'error'
+export type StatusType = 'success' | 'error' | 'info'
