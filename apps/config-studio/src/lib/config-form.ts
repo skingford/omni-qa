@@ -110,7 +110,7 @@ function splitList(value: string): string[] {
 
 function createEnvForm(name: string, env: ConfigStudioEditorState['config']['envs'][string]): EnvFormItem {
   const authType = env.auth?.type ?? 'none'
-  const login = authType === 'bearer' ? env.auth.login : undefined
+  const login = env.auth?.type === 'bearer' ? env.auth.login : undefined
 
   return {
     id: createId('env'),
@@ -118,7 +118,7 @@ function createEnvForm(name: string, env: ConfigStudioEditorState['config']['env
     baseURL: env.baseURL ?? '',
     headersText: recordToText(env.headers),
     authType,
-    authHeadersText: authType === 'header' ? recordToText(env.auth.headers) : '',
+    authHeadersText: env.auth?.type === 'header' ? recordToText(env.auth.headers) : '',
     loginUrl: login?.url ?? '',
     loginMethod: login?.method === 'GET' ? 'GET' : 'POST',
     tokenPath: login?.tokenPath ?? '',

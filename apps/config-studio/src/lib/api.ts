@@ -8,13 +8,14 @@ import type {
   ConfigStudioSavePayload,
   ConfigStudioState,
 } from '../types'
+import { t } from './i18n'
 
 const apiBaseUrl = (import.meta.env.VITE_CONFIG_STUDIO_API_BASE_URL || '').replace(/\/$/, '')
 
 async function parseJsonResponse<T>(response: Response): Promise<T> {
   const payload = await response.json()
   if (!response.ok) {
-    throw new Error(payload.error || 'Request failed.')
+    throw new Error(payload.error || t('status.requestFailed'))
   }
   return payload as T
 }

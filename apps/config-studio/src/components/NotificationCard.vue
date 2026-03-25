@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NotificationFormItem } from '../types'
+import { t } from '../lib/i18n'
 
 const props = defineProps<{
   notify: NotificationFormItem
@@ -15,22 +16,24 @@ const emit = defineEmits<{
   <section class="notify-card">
     <div class="card-head">
       <div>
-        <h3>Notification #{{ props.index + 1 }}</h3>
-        <small>Push concise run summaries to the right audience.</small>
+        <h3>{{ t('notificationCard.title', { index: props.index + 1 }) }}</h3>
+        <small>{{ t('notificationCard.description') }}</small>
       </div>
-      <button type="button" class="ghost" @click="emit('remove', props.index)">Remove</button>
+      <button type="button" class="ghost" @click="emit('remove', props.index)">
+        {{ t('common.remove') }}
+      </button>
     </div>
 
     <div v-if="props.notify.type === 'dingtalk'" class="grid two">
       <div class="field">
-        <label>Type</label>
+        <label>{{ t('notificationCard.type') }}</label>
         <select v-model="props.notify.type">
-          <option value="dingtalk">DingTalk</option>
-          <option value="email">Email</option>
+          <option value="dingtalk">{{ t('notificationCard.dingtalk') }}</option>
+          <option value="email">{{ t('notificationCard.email') }}</option>
         </select>
       </div>
       <div class="field">
-        <label>Webhook</label>
+        <label>{{ t('notificationCard.webhook') }}</label>
         <input v-model="props.notify.webhook" placeholder="https://oapi.dingtalk.com/..." />
       </div>
     </div>
@@ -38,29 +41,29 @@ const emit = defineEmits<{
     <template v-else>
       <div class="grid two">
         <div class="field">
-          <label>Type</label>
+          <label>{{ t('notificationCard.type') }}</label>
           <select v-model="props.notify.type">
-            <option value="dingtalk">DingTalk</option>
-            <option value="email">Email</option>
+            <option value="dingtalk">{{ t('notificationCard.dingtalk') }}</option>
+            <option value="email">{{ t('notificationCard.email') }}</option>
           </select>
         </div>
         <div class="field">
-          <label>Recipients</label>
+          <label>{{ t('notificationCard.recipients') }}</label>
           <input v-model="props.notify.recipientsText" placeholder="qa@example.com, team@example.com" />
         </div>
       </div>
 
       <div class="grid three">
         <div class="field">
-          <label>SMTP host</label>
+          <label>{{ t('notificationCard.smtpHost') }}</label>
           <input v-model="props.notify.smtpHost" placeholder="smtp.example.com" />
         </div>
         <div class="field">
-          <label>SMTP port</label>
+          <label>{{ t('notificationCard.smtpPort') }}</label>
           <input v-model="props.notify.smtpPort" type="number" />
         </div>
         <div class="field">
-          <label>Secure</label>
+          <label>{{ t('notificationCard.secure') }}</label>
           <select v-model="props.notify.smtpSecure">
             <option value="true">true</option>
             <option value="false">false</option>
@@ -70,11 +73,11 @@ const emit = defineEmits<{
 
       <div class="grid two">
         <div class="field">
-          <label>SMTP user</label>
+          <label>{{ t('notificationCard.smtpUser') }}</label>
           <input v-model="props.notify.smtpUser" placeholder="qa@example.com" />
         </div>
         <div class="field">
-          <label>SMTP password</label>
+          <label>{{ t('notificationCard.smtpPassword') }}</label>
           <input v-model="props.notify.smtpPass" placeholder="app-password" />
         </div>
       </div>

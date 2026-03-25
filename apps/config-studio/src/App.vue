@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import EnvironmentCard from './components/EnvironmentCard.vue'
 import NotificationCard from './components/NotificationCard.vue'
+import { locale, localeChoices, setLocale, t } from './lib/i18n'
 import {
   bootstrapConfigStudioProject,
   getConfigStudioRunSession,
@@ -136,15 +137,29 @@ const activeRunStatusLabel = computed(() => {
   }
 
   if (runSession.value.status === 'running') {
-    return 'Live run in progress'
+    return t('run.liveInProgress')
   }
 
   if (runSession.value.status === 'cancelled') {
-    return 'Latest run was cancelled'
+    return t('run.latestCancelled')
   }
 
-  return runSession.value.success ? 'Latest run passed' : 'Latest run finished with failures'
+  return runSession.value.success ? t('run.latestPassed') : t('run.latestFailed')
 })
+
+const localeModel = computed({
+  get: () => locale.value,
+  set: (value: string) => {
+    setLocale(value as typeof locale.value)
+  },
+})
+
+const languageOptions = computed(() =>
+  localeChoices.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  })),
+)
 
 let runPollTimer: number | undefined
 
@@ -183,7 +198,7 @@ function applyState(payload: ConfigStudioState) {
 async function fetchState(isReload = false) {
   loading.value = true
   setStatus(
-    isReload ? 'Reloading configuration from disk...' : 'Loading configuration studio...',
+    isReload ? t('status.reloading') : t('status.loadingStudio'),
     'info',
   )
 
@@ -192,9 +207,9 @@ async function fetchState(isReload = false) {
     applyState(payload)
 
     if (payload.mode === 'bootstrap') {
-      setStatus('No config detected yet. Choose a starter setup and create the project files.', 'info')
+      setStatus(t('status.noConfig'), 'info')
     } else {
-      setStatus('Configuration loaded. Adjust the form and save when ready.', 'success')
+      setStatus(t('status.configLoaded'), 'success')
     }
   } catch (error) {
     setStatus(error instanceof Error ? error.message : String(error), 'error')
@@ -228,7 +243,7 @@ function removeNotification(index: number) {
 
 async function bootstrapProject() {
   bootstrapping.value = true
-  setStatus('Creating starter project files...', 'info')
+  setStatus(t('status.creatingStarter'), 'info')
 
   try {
     const payload = await bootstrapConfigStudioProject({
@@ -237,7 +252,7 @@ async function bootstrapProject() {
       baseUrl: bootstrap.value.baseUrl.trim(),
     })
     applyState(payload)
-    setStatus('Starter files created. You can fine-tune them below and save anytime.', 'success')
+    setStatus(t('status.starterCreated'), 'success')
   } catch (error) {
     setStatus(error instanceof Error ? error.message : String(error), 'error')
   } finally {
@@ -247,12 +262,12 @@ async function bootstrapProject() {
 
 async function saveState() {
   saving.value = true
-  setStatus('Saving configuration...', 'info')
+  setStatus(t('status.savingConfig'), 'info')
 
   try {
     const payload = await saveConfigStudioState(buildSavePayload(form.value))
     applyState(payload)
-    setStatus('Saved. Config and .env are updated on disk.', 'success')
+    setStatus(t('status.saved'), 'success')
   } catch (error) {
     setStatus(error instanceof Error ? error.message : String(error), 'error')
   } finally {
@@ -276,17 +291,17 @@ async function importFromSource() {
   const outDir = importForm.value.outDir.trim()
 
   if (!source) {
-    setStatus('Enter an OpenAPI URL or local file path before importing.', 'error')
+    setStatus(t('status.importSourceRequired'), 'error')
     return
   }
 
   if (!outDir) {
-    setStatus('Choose where generated test files should be written.', 'error')
+    setStatus(t('status.importOutDirRequired'), 'error')
     return
   }
 
   importing.value = true
-  setStatus('Importing OpenAPI document and generating tests...', 'info')
+  setStatus(t('status.importing'), 'info')
 
   try {
     importResult.value = await importConfigStudioSource({
@@ -296,7 +311,10 @@ async function importFromSource() {
       force: importForm.value.force,
     })
     setStatus(
-      `Imported ${importResult.value.apiTitle} and generated ${importResult.value.generatedFiles.length} test file(s).`,
+      t('status.imported', {
+        title: importResult.value.apiTitle,
+        count: importResult.value.generatedFiles.length,
+      }),
       'success',
     )
   } catch (error) {
@@ -312,7 +330,7 @@ async function runTests() {
   clearRunPollTimer()
   running.value = true
   stoppingRun.value = false
-  setStatus('Starting Playwright run...', 'info')
+  setStatus(t('status.startingRun'), 'info')
 
   try {
     runSession.value = await startConfigStudioRunSession({
@@ -329,7 +347,7 @@ async function runTests() {
     }
 
     if (runSession.value.status === 'running') {
-      setStatus('Playwright run started. Streaming live output...', 'info')
+      setStatus(t('status.runStarted'), 'info')
       scheduleRunPoll(runSession.value.id)
       return
     }
@@ -353,7 +371,7 @@ async function stopActiveRun() {
   }
 
   stoppingRun.value = true
-  setStatus('Stopping Playwright run...', 'info')
+  setStatus(t('status.stoppingRun'), 'info')
 
   try {
     const snapshot = await stopConfigStudioRunSession(runSession.value.id)
@@ -411,10 +429,10 @@ function finalizeRunSession(session: ConfigStudioRunSession) {
   stoppingRun.value = false
   setStatus(
     session.status === 'cancelled'
-      ? 'Test run cancelled.'
+      ? t('status.runCancelled')
       : session.success
-        ? 'Test run finished successfully.'
-        : `Test run finished with exit code ${session.exitCode ?? 1}.`,
+        ? t('status.runSucceeded')
+        : t('status.runFailed', { exitCode: session.exitCode ?? 1 }),
     session.status === 'cancelled'
       ? 'info'
       : session.success
@@ -436,33 +454,47 @@ onBeforeUnmount(() => {
   <div class="shell">
     <section class="hero">
       <div>
-        <h1>omni-qa config studio</h1>
-        <p>
-          Use this page to bootstrap or edit environments, auth flows, notifications, and secret
-          placeholders without hand-editing multiple files.
-        </p>
+        <h1>{{ t('hero.title') }}</h1>
+        <p>{{ t('hero.description') }}</p>
       </div>
       <div class="hero-meta">
         <div class="meta-card">
-          <strong>Config file</strong>
-          <code>{{ paths.configPath || 'Loading...' }}</code>
+          <strong>{{ t('hero.configFile') }}</strong>
+          <code>{{ paths.configPath || t('common.loading') }}</code>
         </div>
         <div class="meta-card">
-          <strong>Env file</strong>
-          <code>{{ paths.envPath || 'Loading...' }}</code>
+          <strong>{{ t('hero.envFile') }}</strong>
+          <code>{{ paths.envPath || t('common.loading') }}</code>
         </div>
       </div>
     </section>
 
     <div class="page-actions">
-      <button class="secondary" :disabled="pageBusy" @click="fetchState(true)">Reload from disk</button>
+      <div class="page-actions-left">
+        <label class="locale-control" for="locale-select">
+          <span>{{ t('language.label') }}</span>
+          <select id="locale-select" v-model="localeModel">
+            <option
+              v-for="option in languageOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+
+        <button class="secondary" :disabled="pageBusy" @click="fetchState(true)">
+          {{ t('actions.reload') }}
+        </button>
+      </div>
       <button
         v-if="studioMode === 'bootstrap'"
         class="primary"
         :disabled="pageBusy"
         @click="bootstrapProject"
       >
-        {{ bootstrapping ? 'Creating project...' : 'Create starter project' }}
+        {{ bootstrapping ? t('actions.creatingProject') : t('actions.createProject') }}
       </button>
       <button
         v-else
@@ -470,7 +502,7 @@ onBeforeUnmount(() => {
         :disabled="pageBusy"
         @click="saveState"
       >
-        {{ saving ? 'Saving...' : 'Save configuration' }}
+        {{ saving ? t('actions.saving') : t('actions.saveConfig') }}
       </button>
     </div>
 
@@ -479,25 +511,22 @@ onBeforeUnmount(() => {
     </div>
 
     <main>
-      <div v-if="loading" class="panel loading-note">Loading configuration studio...</div>
+      <div v-if="loading" class="panel loading-note">{{ t('status.loadingStudio') }}</div>
 
       <template v-else-if="studioMode === 'bootstrap'">
         <div class="panel">
           <div class="toolbar">
             <div>
-              <span class="section-title">Bootstrap</span>
-              <h2>Create your first omni-qa workspace files</h2>
-              <p>
-                Pick a sensible starting point, generate the files, then continue tweaking
-                everything in the editor.
-              </p>
+              <span class="section-title">{{ t('bootstrap.section') }}</span>
+              <h2>{{ t('bootstrap.title') }}</h2>
+              <p>{{ t('bootstrap.description') }}</p>
             </div>
           </div>
 
           <div class="stack">
             <div class="grid two">
               <div class="field">
-                <label for="bootstrap-default-env">Default environment</label>
+                <label for="bootstrap-default-env">{{ t('bootstrap.defaultEnvironment') }}</label>
                 <input
                   id="bootstrap-default-env"
                   v-model="bootstrap.defaultEnv"
@@ -505,7 +534,7 @@ onBeforeUnmount(() => {
                 />
               </div>
               <div class="field">
-                <label for="bootstrap-base-url">Base URL</label>
+                <label for="bootstrap-base-url">{{ t('bootstrap.baseUrl') }}</label>
                 <input
                   id="bootstrap-base-url"
                   v-model="bootstrap.baseUrl"
@@ -515,39 +544,37 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="field">
-              <label for="bootstrap-auth">Authentication scaffold</label>
+              <label for="bootstrap-auth">{{ t('bootstrap.authScaffold') }}</label>
               <select id="bootstrap-auth" v-model="bootstrap.authMode">
-                <option value="none">No auth</option>
-                <option value="header">Static auth headers</option>
-                <option value="bearer">Login and fetch bearer token</option>
+                <option value="none">{{ t('bootstrap.noAuth') }}</option>
+                <option value="header">{{ t('bootstrap.staticAuthHeaders') }}</option>
+                <option value="bearer">{{ t('bootstrap.loginBearer') }}</option>
               </select>
-              <div class="hint">
-                This chooses which starter auth fields and .env placeholders get generated.
-              </div>
+              <div class="hint" v-html="t('bootstrap.authScaffoldHint')"></div>
             </div>
 
             <div class="toggle-grid">
               <label class="toggle-card">
                 <input v-model="bootstrap.includeDingtalk" type="checkbox" />
                 <div>
-                  <strong>Include DingTalk</strong>
-                  <span>Generate a webhook notification block and placeholder.</span>
+                  <strong>{{ t('bootstrap.includeDingtalk') }}</strong>
+                  <span>{{ t('bootstrap.includeDingtalkHint') }}</span>
                 </div>
               </label>
 
               <label class="toggle-card">
                 <input v-model="bootstrap.includeEmail" type="checkbox" />
                 <div>
-                  <strong>Include email</strong>
-                  <span>Generate SMTP notification config and env placeholders.</span>
+                  <strong>{{ t('bootstrap.includeEmail') }}</strong>
+                  <span>{{ t('bootstrap.includeEmailHint') }}</span>
                 </div>
               </label>
 
               <label class="toggle-card">
                 <input v-model="bootstrap.createEnvFile" type="checkbox" />
                 <div>
-                  <strong>Create local .env</strong>
-                  <span>Uncheck this if you only want `.env.example` at bootstrap time.</span>
+                  <strong>{{ t('bootstrap.createEnvFile') }}</strong>
+                  <span>{{ t('bootstrap.createEnvFileHint') }}</span>
                 </div>
               </label>
             </div>
@@ -555,31 +582,31 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="panel">
-          <span class="section-title">Preview</span>
-          <h2>What the studio will create</h2>
+          <span class="section-title">{{ t('bootstrap.preview') }}</span>
+          <h2>{{ t('bootstrap.previewTitle') }}</h2>
           <div class="command-list">
             <code>{{ bootstrapCommandPreview }}</code>
           </div>
 
           <div class="checklist">
-            <div><strong>Files</strong></div>
+            <div><strong>{{ t('common.files') }}</strong></div>
             <div><code>omni-qa.config.ts</code>, <code>.env.example</code>, <code>playwright.config.ts</code></div>
-            <div><strong>Folders</strong></div>
+            <div><strong>{{ t('common.folders') }}</strong></div>
             <div><code>tests/api</code>, <code>reports</code></div>
-            <div><strong>Optional</strong></div>
+            <div><strong>{{ t('common.optional') }}</strong></div>
             <div>
               <template v-if="bootstrap.createEnvFile">
-                Also creates <code>.env</code> if it is missing.
+                <span v-html="t('bootstrap.createsEnv')"></span>
               </template>
               <template v-else>
-                Skips <code>.env</code> creation for now.
+                <span v-html="t('bootstrap.skipsEnv')"></span>
               </template>
             </div>
           </div>
 
           <div class="panel panel-embedded">
-            <span class="section-title">Then</span>
-            <h2>Next commands</h2>
+            <span class="section-title">{{ t('bootstrap.then') }}</span>
+            <h2>{{ t('bootstrap.nextCommands') }}</h2>
             <div class="command-list">
               <code>bun run dev -- import https://your-api.example.com/openapi.json</code>
               <code>bun run dev -- run --env {{ effectiveDefaultEnv }}</code>
@@ -593,62 +620,62 @@ onBeforeUnmount(() => {
         <div class="panel">
           <div class="toolbar">
             <div>
-              <span class="section-title">General</span>
-              <h2>Project defaults</h2>
-              <p>Choose the primary environment and where tests and reports should live.</p>
+              <span class="section-title">{{ t('general.section') }}</span>
+              <h2>{{ t('general.title') }}</h2>
+              <p>{{ t('general.description') }}</p>
             </div>
           </div>
 
           <div class="stack">
             <div class="grid three">
               <div class="field">
-                <label for="default-env">Default environment</label>
+                <label for="default-env">{{ t('general.defaultEnvironment') }}</label>
                 <select id="default-env" v-model="form.defaultEnv">
                   <option
                     v-for="env in form.envs"
                     :key="`${env.id}-default`"
                     :value="env.name"
                   >
-                    {{ env.name || 'env' }}
+                    {{ env.name || t('common.envFallback') }}
                   </option>
                 </select>
               </div>
               <div class="field">
-                <label for="test-dir">Test directory</label>
+                <label for="test-dir">{{ t('general.testDirectory') }}</label>
                 <input id="test-dir" v-model="form.testDir" />
               </div>
               <div class="field">
-                <label for="report-dir">Report directory</label>
+                <label for="report-dir">{{ t('general.reportDirectory') }}</label>
                 <input id="report-dir" v-model="form.reportDir" />
               </div>
             </div>
 
             <div class="field">
-              <label for="global-headers">Global headers</label>
+              <label for="global-headers">{{ t('general.globalHeaders') }}</label>
               <textarea
                 id="global-headers"
                 v-model="form.globalHeadersText"
                 placeholder="Content-Type=application/json&#10;Accept=application/json"
               ></textarea>
-              <div class="hint">
-                One header per line. Use either <code>key=value</code> or <code>key: value</code>.
-              </div>
+              <div class="hint" v-html="t('general.globalHeadersHint')"></div>
             </div>
 
             <div class="panel panel-embedded">
               <div class="toolbar">
                 <div>
-                  <span class="section-title">Environments</span>
-                  <h2>Targets and authentication</h2>
-                  <p>Each environment can have its own base URL, headers, and auth workflow.</p>
+                  <span class="section-title">{{ t('environments.section') }}</span>
+                  <h2>{{ t('environments.title') }}</h2>
+                  <p>{{ t('environments.description') }}</p>
                 </div>
                 <div class="actions">
-                  <button type="button" class="secondary" @click="addEnvironment">Add environment</button>
+                  <button type="button" class="secondary" @click="addEnvironment">
+                    {{ t('environments.add') }}
+                  </button>
                 </div>
               </div>
 
               <div v-if="!form.envs.length" class="empty-note">
-                No environments yet. Add one to point omni-qa at a target API.
+                {{ t('environments.empty') }}
               </div>
 
               <div v-else class="stack">
@@ -665,17 +692,19 @@ onBeforeUnmount(() => {
             <div class="panel panel-embedded">
               <div class="toolbar">
                 <div>
-                  <span class="section-title">Notifications</span>
-                  <h2>Alerts after a test run</h2>
-                  <p>Wire up DingTalk or email channels for automated results.</p>
+                  <span class="section-title">{{ t('notifications.section') }}</span>
+                  <h2>{{ t('notifications.title') }}</h2>
+                  <p>{{ t('notifications.description') }}</p>
                 </div>
                 <div class="actions">
-                  <button type="button" class="secondary" @click="addNotification">Add notification</button>
+                  <button type="button" class="secondary" @click="addNotification">
+                    {{ t('notifications.add') }}
+                  </button>
                 </div>
               </div>
 
               <div v-if="!form.notifications.length" class="empty-note">
-                No notification channels configured. Add DingTalk or email when you want push alerts.
+                {{ t('notifications.empty') }}
               </div>
 
               <div v-else class="stack">
@@ -690,27 +719,25 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="field">
-              <label for="env-text">Environment variables (.env)</label>
+              <label for="env-text">{{ t('general.envVars') }}</label>
               <textarea
                 id="env-text"
                 v-model="form.envText"
                 style="min-height: 220px;"
                 placeholder="API_KEY=...&#10;USERNAME=...&#10;PASSWORD=..."
               ></textarea>
-              <div class="hint">
-                The values here are saved into <code>.env</code>. Keep secrets referenced from the config instead of hardcoding them.
-              </div>
+              <div class="hint" v-html="t('general.envVarsHint')"></div>
             </div>
           </div>
         </div>
 
         <div class="side-stack">
           <div class="panel">
-            <span class="section-title">Import</span>
-            <h2>Generate tests from OpenAPI</h2>
+            <span class="section-title">{{ t('import.section') }}</span>
+            <h2>{{ t('import.title') }}</h2>
             <div class="stack">
               <div class="field">
-                <label for="import-source">Source URL or file path</label>
+                <label for="import-source">{{ t('import.source') }}</label>
                 <input
                   id="import-source"
                   v-model="importForm.source"
@@ -719,7 +746,7 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="field">
-                <label for="import-out-dir">Output directory</label>
+                <label for="import-out-dir">{{ t('import.outDir') }}</label>
                 <input
                   id="import-out-dir"
                   v-model="importForm.outDir"
@@ -728,44 +755,45 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="field">
-                <label for="import-tags">Filter tags</label>
+                <label for="import-tags">{{ t('import.filterTags') }}</label>
                 <textarea
                   id="import-tags"
                   v-model="importForm.tagsText"
                   style="min-height: 96px;"
                   placeholder="users, orders"
                 ></textarea>
-                <div class="hint">
-                  Optional. Separate multiple tags with commas or new lines.
-                </div>
+                <div class="hint">{{ t('import.filterTagsHint') }}</div>
               </div>
 
               <label class="toggle-card compact">
                 <input v-model="importForm.force" type="checkbox" />
                 <div>
-                  <strong>Overwrite generated files</strong>
-                  <span>Use this when you want to regenerate files that already exist.</span>
+                  <strong>{{ t('import.overwrite') }}</strong>
+                  <span>{{ t('import.overwriteHint') }}</span>
                 </div>
               </label>
 
               <button class="primary" :disabled="pageBusy" @click="importFromSource">
-                {{ importing ? 'Generating tests...' : 'Import and generate tests' }}
+                {{ importing ? t('import.importingButton') : t('import.importButton') }}
               </button>
 
               <div v-if="importResult" class="result-card">
                 <div class="result-summary">
                   <strong>{{ importResult.apiTitle }}</strong>
-                  <span>v{{ importResult.apiVersion }} · {{ importResult.endpointCount }} endpoints</span>
+                  <span>
+                    v{{ importResult.apiVersion }} ·
+                    {{ t('result.endpoints', { count: importResult.endpointCount }) }}
+                  </span>
                 </div>
                 <div class="checklist compact">
-                  <div><strong>Output</strong></div>
+                  <div><strong>{{ t('common.outputDirectory') }}</strong></div>
                   <div><code>{{ importResult.outDir }}</code></div>
-                  <div><strong>Generated</strong></div>
-                  <div>{{ importResult.generatedFiles.length }} file(s)</div>
+                  <div><strong>{{ t('common.generated') }}</strong></div>
+                  <div>{{ t('common.fileCount', { count: importResult.generatedFiles.length }) }}</div>
                 </div>
 
                 <div v-if="importResult.groups.length" class="result-list">
-                  <div class="section-title">Groups</div>
+                  <div class="section-title">{{ t('common.groups') }}</div>
                   <div class="pill-list">
                     <span
                       v-for="group in importResult.groups"
@@ -778,7 +806,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div v-if="importResult.generatedFiles.length" class="result-list">
-                  <div class="section-title">Files</div>
+                  <div class="section-title">{{ t('common.files') }}</div>
                   <code
                     v-for="file in importResult.generatedFiles"
                     :key="file"
@@ -792,37 +820,37 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="panel">
-            <span class="section-title">Run</span>
-            <h2>Execute tests and inspect the report</h2>
+            <span class="section-title">{{ t('run.section') }}</span>
+            <h2>{{ t('run.title') }}</h2>
             <div class="stack">
               <div class="grid two">
                 <div class="field">
-                  <label for="run-env">Environment</label>
+                  <label for="run-env">{{ t('run.environment') }}</label>
                   <select id="run-env" v-model="runForm.env">
                     <option
                       v-for="env in form.envs"
                       :key="`${env.id}-run`"
                       :value="env.name"
                     >
-                      {{ env.name || 'env' }}
+                      {{ env.name || t('common.envFallback') }}
                     </option>
                   </select>
                 </div>
 
                 <div class="field">
-                  <label for="run-tag">Tag filter</label>
+                  <label for="run-tag">{{ t('run.tagFilter') }}</label>
                   <input id="run-tag" v-model="runForm.tag" placeholder="@pet" />
                 </div>
               </div>
 
               <div class="grid three">
                 <div class="field">
-                  <label for="run-retry">Retries</label>
+                  <label for="run-retry">{{ t('run.retries') }}</label>
                   <input id="run-retry" v-model="runForm.retry" type="number" min="0" />
                 </div>
 
                 <div class="field">
-                  <label for="run-workers">Workers</label>
+                  <label for="run-workers">{{ t('run.workers') }}</label>
                   <input id="run-workers" v-model="runForm.workers" type="number" min="1" placeholder="auto" />
                 </div>
 
@@ -830,16 +858,16 @@ onBeforeUnmount(() => {
                   <label class="toggle-card compact">
                     <input v-model="runForm.trace" type="checkbox" />
                     <div>
-                      <strong>Trace</strong>
-                      <span>Set <code>TRACE=on</code> for this run.</span>
+                      <strong>{{ t('run.trace') }}</strong>
+                      <span v-html="t('run.traceHint')"></span>
                     </div>
                   </label>
 
                   <label class="toggle-card compact">
                     <input v-model="runForm.headed" type="checkbox" />
                     <div>
-                      <strong>Headed</strong>
-                      <span>Use headed mode for debugging.</span>
+                      <strong>{{ t('run.headed') }}</strong>
+                      <span>{{ t('run.headedHint') }}</span>
                     </div>
                   </label>
                 </div>
@@ -847,7 +875,7 @@ onBeforeUnmount(() => {
 
               <div class="run-actions">
                 <button class="primary" :disabled="runButtonDisabled" @click="runTests">
-                  {{ running ? 'Streaming live run...' : 'Run Playwright tests' }}
+                  {{ running ? t('run.runningButton') : t('run.runButton') }}
                 </button>
                 <button
                   v-if="canStopRun"
@@ -855,7 +883,7 @@ onBeforeUnmount(() => {
                   :disabled="stoppingRun"
                   @click="stopActiveRun"
                 >
-                  {{ stoppingRun ? 'Stopping run...' : 'Stop current run' }}
+                  {{ stoppingRun ? t('run.stoppingButton') : t('run.stopButton') }}
                 </button>
                 <a
                   v-if="reportState?.available && reportState.reportUrl"
@@ -864,7 +892,7 @@ onBeforeUnmount(() => {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open latest HTML report
+                  {{ t('run.openReport') }}
                 </a>
               </div>
 
@@ -873,7 +901,7 @@ onBeforeUnmount(() => {
                   <strong>{{ activeRunStatusLabel }}</strong>
                   <span>
                     <template v-if="runSession.exitCode !== null">
-                      Exit {{ runSession.exitCode }} ·
+                      {{ t('run.exit') }} {{ runSession.exitCode }} ·
                     </template>
                     {{ Math.round(runSession.durationMs / 100) / 10 }}s ·
                     <code>{{ runSession.command }}</code>
@@ -881,13 +909,13 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="checklist compact">
-                  <div><strong>Report directory</strong></div>
+                  <div><strong>{{ t('common.reportDirectory') }}</strong></div>
                   <div><code>{{ reportState?.htmlDir || 'reports/html' }}</code></div>
                 </div>
 
                 <div v-if="runSession.output" class="result-list">
                   <div class="section-title">
-                    {{ runSession.status === 'running' ? 'Live output' : 'Output' }}
+                    {{ runSession.status === 'running' ? t('run.liveOutput') : t('common.output') }}
                   </div>
                   <pre class="log-output">{{ runSession.output }}</pre>
                 </div>
@@ -896,8 +924,8 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="panel">
-            <span class="section-title">Runbook</span>
-            <h2>Next commands</h2>
+            <span class="section-title">{{ t('runbook.section') }}</span>
+            <h2>{{ t('runbook.title') }}</h2>
             <div class="command-list">
               <code>bun run dev -- import https://your-api.example.com/openapi.json</code>
               <code>bun run dev -- run --env {{ effectiveDefaultEnv }}</code>
@@ -909,7 +937,7 @@ onBeforeUnmount(() => {
     </main>
 
     <div class="footer-note">
-      Tip: keep this terminal open while the studio is running. Press Ctrl+C to stop the local server.
+      {{ t('runbook.footer') }}
     </div>
   </div>
 </template>
