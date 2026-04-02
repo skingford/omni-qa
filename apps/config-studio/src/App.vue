@@ -161,6 +161,26 @@ const languageOptions = computed(() =>
   })),
 )
 
+const editorOverviewCards = computed(() => [
+  {
+    label: t('general.defaultEnvironment'),
+    value: effectiveDefaultEnv.value || '—',
+  },
+  {
+    label: t('environments.section'),
+    value: String(form.value.envs.length),
+  },
+  {
+    label: t('notifications.section'),
+    value: String(form.value.notifications.length),
+  },
+  {
+    label: t('general.testDirectory'),
+    value: form.value.testDir || 'tests/api',
+    mono: true,
+  },
+])
+
 let runPollTimer: number | undefined
 
 function setStatus(message: string, type: StatusType = 'success') {
@@ -514,97 +534,103 @@ onBeforeUnmount(() => {
       <div v-if="loading" class="panel loading-note">{{ t('status.loadingStudio') }}</div>
 
       <template v-else-if="studioMode === 'bootstrap'">
-        <div class="panel">
-          <div class="toolbar">
-            <div>
-              <span class="section-title">{{ t('bootstrap.section') }}</span>
-              <h2>{{ t('bootstrap.title') }}</h2>
-              <p>{{ t('bootstrap.description') }}</p>
-            </div>
-          </div>
-
-          <div class="stack">
-            <div class="grid two">
-              <div class="field">
-                <label for="bootstrap-default-env">{{ t('bootstrap.defaultEnvironment') }}</label>
-                <input
-                  id="bootstrap-default-env"
-                  v-model="bootstrap.defaultEnv"
-                  placeholder="dev"
-                />
+        <div class="workspace-main">
+          <div class="panel workspace-panel">
+            <section class="section-shell">
+              <div class="section-head">
+                <div class="section-copy">
+                  <span class="section-title">{{ t('bootstrap.section') }}</span>
+                  <h2>{{ t('bootstrap.title') }}</h2>
+                  <p>{{ t('bootstrap.description') }}</p>
+                </div>
               </div>
-              <div class="field">
-                <label for="bootstrap-base-url">{{ t('bootstrap.baseUrl') }}</label>
-                <input
-                  id="bootstrap-base-url"
-                  v-model="bootstrap.baseUrl"
-                  placeholder="https://dev-api.example.com"
-                />
+
+              <div class="stack">
+                <div class="grid two">
+                  <div class="field">
+                    <label for="bootstrap-default-env">{{ t('bootstrap.defaultEnvironment') }}</label>
+                    <input
+                      id="bootstrap-default-env"
+                      v-model="bootstrap.defaultEnv"
+                      placeholder="dev"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="bootstrap-base-url">{{ t('bootstrap.baseUrl') }}</label>
+                    <input
+                      id="bootstrap-base-url"
+                      v-model="bootstrap.baseUrl"
+                      placeholder="https://dev-api.example.com"
+                    />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="bootstrap-auth">{{ t('bootstrap.authScaffold') }}</label>
+                  <select id="bootstrap-auth" v-model="bootstrap.authMode">
+                    <option value="none">{{ t('bootstrap.noAuth') }}</option>
+                    <option value="header">{{ t('bootstrap.staticAuthHeaders') }}</option>
+                    <option value="bearer">{{ t('bootstrap.loginBearer') }}</option>
+                  </select>
+                  <div class="hint" v-html="t('bootstrap.authScaffoldHint')"></div>
+                </div>
+
+                <div class="toggle-grid">
+                  <label class="toggle-card">
+                    <input v-model="bootstrap.includeDingtalk" type="checkbox" />
+                    <div>
+                      <strong>{{ t('bootstrap.includeDingtalk') }}</strong>
+                      <span>{{ t('bootstrap.includeDingtalkHint') }}</span>
+                    </div>
+                  </label>
+
+                  <label class="toggle-card">
+                    <input v-model="bootstrap.includeEmail" type="checkbox" />
+                    <div>
+                      <strong>{{ t('bootstrap.includeEmail') }}</strong>
+                      <span>{{ t('bootstrap.includeEmailHint') }}</span>
+                    </div>
+                  </label>
+
+                  <label class="toggle-card">
+                    <input v-model="bootstrap.createEnvFile" type="checkbox" />
+                    <div>
+                      <strong>{{ t('bootstrap.createEnvFile') }}</strong>
+                      <span>{{ t('bootstrap.createEnvFileHint') }}</span>
+                    </div>
+                  </label>
+                </div>
               </div>
-            </div>
-
-            <div class="field">
-              <label for="bootstrap-auth">{{ t('bootstrap.authScaffold') }}</label>
-              <select id="bootstrap-auth" v-model="bootstrap.authMode">
-                <option value="none">{{ t('bootstrap.noAuth') }}</option>
-                <option value="header">{{ t('bootstrap.staticAuthHeaders') }}</option>
-                <option value="bearer">{{ t('bootstrap.loginBearer') }}</option>
-              </select>
-              <div class="hint" v-html="t('bootstrap.authScaffoldHint')"></div>
-            </div>
-
-            <div class="toggle-grid">
-              <label class="toggle-card">
-                <input v-model="bootstrap.includeDingtalk" type="checkbox" />
-                <div>
-                  <strong>{{ t('bootstrap.includeDingtalk') }}</strong>
-                  <span>{{ t('bootstrap.includeDingtalkHint') }}</span>
-                </div>
-              </label>
-
-              <label class="toggle-card">
-                <input v-model="bootstrap.includeEmail" type="checkbox" />
-                <div>
-                  <strong>{{ t('bootstrap.includeEmail') }}</strong>
-                  <span>{{ t('bootstrap.includeEmailHint') }}</span>
-                </div>
-              </label>
-
-              <label class="toggle-card">
-                <input v-model="bootstrap.createEnvFile" type="checkbox" />
-                <div>
-                  <strong>{{ t('bootstrap.createEnvFile') }}</strong>
-                  <span>{{ t('bootstrap.createEnvFileHint') }}</span>
-                </div>
-              </label>
-            </div>
+            </section>
           </div>
         </div>
 
-        <div class="panel">
-          <span class="section-title">{{ t('bootstrap.preview') }}</span>
-          <h2>{{ t('bootstrap.previewTitle') }}</h2>
-          <div class="command-list">
-            <code>{{ bootstrapCommandPreview }}</code>
-          </div>
+        <aside class="side-stack">
+          <div class="panel">
+            <span class="section-title">{{ t('bootstrap.preview') }}</span>
+            <h2>{{ t('bootstrap.previewTitle') }}</h2>
+            <div class="command-list">
+              <code>{{ bootstrapCommandPreview }}</code>
+            </div>
 
-          <div class="checklist">
-            <div><strong>{{ t('common.files') }}</strong></div>
-            <div><code>omni-qa.config.ts</code>, <code>.env.example</code>, <code>playwright.config.ts</code></div>
-            <div><strong>{{ t('common.folders') }}</strong></div>
-            <div><code>tests/api</code>, <code>reports</code></div>
-            <div><strong>{{ t('common.optional') }}</strong></div>
-            <div>
-              <template v-if="bootstrap.createEnvFile">
-                <span v-html="t('bootstrap.createsEnv')"></span>
-              </template>
-              <template v-else>
-                <span v-html="t('bootstrap.skipsEnv')"></span>
-              </template>
+            <div class="checklist">
+              <div><strong>{{ t('common.files') }}</strong></div>
+              <div><code>omni-qa.config.ts</code>, <code>.env.example</code>, <code>playwright.config.ts</code></div>
+              <div><strong>{{ t('common.folders') }}</strong></div>
+              <div><code>tests/api</code>, <code>reports</code></div>
+              <div><strong>{{ t('common.optional') }}</strong></div>
+              <div>
+                <template v-if="bootstrap.createEnvFile">
+                  <span v-html="t('bootstrap.createsEnv')"></span>
+                </template>
+                <template v-else>
+                  <span v-html="t('bootstrap.skipsEnv')"></span>
+                </template>
+              </div>
             </div>
           </div>
 
-          <div class="panel panel-embedded">
+          <div class="panel">
             <span class="section-title">{{ t('bootstrap.then') }}</span>
             <h2>{{ t('bootstrap.nextCommands') }}</h2>
             <div class="command-list">
@@ -613,68 +639,83 @@ onBeforeUnmount(() => {
               <code>bun run dev -- report</code>
             </div>
           </div>
-        </div>
+        </aside>
       </template>
 
       <template v-else>
-        <div class="panel">
-          <div class="toolbar">
-            <div>
-              <span class="section-title">{{ t('general.section') }}</span>
-              <h2>{{ t('general.title') }}</h2>
-              <p>{{ t('general.description') }}</p>
-            </div>
-          </div>
-
-          <div class="stack">
-            <div class="grid three">
-              <div class="field">
-                <label for="default-env">{{ t('general.defaultEnvironment') }}</label>
-                <select id="default-env" v-model="form.defaultEnv">
-                  <option
-                    v-for="env in form.envs"
-                    :key="`${env.id}-default`"
-                    :value="env.name"
-                  >
-                    {{ env.name || t('common.envFallback') }}
-                  </option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="test-dir">{{ t('general.testDirectory') }}</label>
-                <input id="test-dir" v-model="form.testDir" />
-              </div>
-              <div class="field">
-                <label for="report-dir">{{ t('general.reportDirectory') }}</label>
-                <input id="report-dir" v-model="form.reportDir" />
-              </div>
+        <div class="workspace-main">
+          <div class="panel workspace-panel">
+            <div class="workspace-summary-grid">
+              <article
+                v-for="card in editorOverviewCards"
+                :key="card.label"
+                class="summary-card"
+                :class="{ mono: card.mono }"
+              >
+                <span class="summary-label">{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+              </article>
             </div>
 
-            <div class="field">
-              <label for="global-headers">{{ t('general.globalHeaders') }}</label>
-              <textarea
-                id="global-headers"
-                v-model="form.globalHeadersText"
-                placeholder="Content-Type=application/json&#10;Accept=application/json"
-              ></textarea>
-              <div class="hint" v-html="t('general.globalHeadersHint')"></div>
-            </div>
+            <section class="section-shell">
+              <div class="section-head">
+                <div class="section-copy">
+                  <span class="section-title">{{ t('general.section') }}</span>
+                  <h2>{{ t('general.title') }}</h2>
+                  <p>{{ t('general.description') }}</p>
+                </div>
+              </div>
 
-            <div class="panel panel-embedded">
-              <div class="toolbar">
-                <div>
+              <div class="grid three">
+                <div class="field">
+                  <label for="default-env">{{ t('general.defaultEnvironment') }}</label>
+                  <select id="default-env" v-model="form.defaultEnv">
+                    <option
+                      v-for="env in form.envs"
+                      :key="`${env.id}-default`"
+                      :value="env.name"
+                    >
+                      {{ env.name || t('common.envFallback') }}
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="test-dir">{{ t('general.testDirectory') }}</label>
+                  <input id="test-dir" v-model="form.testDir" />
+                </div>
+                <div class="field">
+                  <label for="report-dir">{{ t('general.reportDirectory') }}</label>
+                  <input id="report-dir" v-model="form.reportDir" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="global-headers">{{ t('general.globalHeaders') }}</label>
+                <textarea
+                  id="global-headers"
+                  v-model="form.globalHeadersText"
+                  placeholder="Content-Type=application/json&#10;Accept=application/json"
+                ></textarea>
+                <div class="hint" v-html="t('general.globalHeadersHint')"></div>
+              </div>
+            </section>
+
+            <section class="section-shell">
+              <div class="section-head">
+                <div class="section-copy">
                   <span class="section-title">{{ t('environments.section') }}</span>
                   <h2>{{ t('environments.title') }}</h2>
                   <p>{{ t('environments.description') }}</p>
                 </div>
-                <div class="actions">
+                <div class="section-actions">
+                  <span class="count-badge">{{ form.envs.length }}</span>
                   <button type="button" class="secondary" @click="addEnvironment">
                     {{ t('environments.add') }}
                   </button>
                 </div>
               </div>
 
-              <div v-if="!form.envs.length" class="empty-note">
+              <div v-if="!form.envs.length" class="empty-note section-empty">
                 {{ t('environments.empty') }}
               </div>
 
@@ -687,23 +728,24 @@ onBeforeUnmount(() => {
                   @remove="removeEnvironment"
                 />
               </div>
-            </div>
+            </section>
 
-            <div class="panel panel-embedded">
-              <div class="toolbar">
-                <div>
+            <section class="section-shell">
+              <div class="section-head">
+                <div class="section-copy">
                   <span class="section-title">{{ t('notifications.section') }}</span>
                   <h2>{{ t('notifications.title') }}</h2>
                   <p>{{ t('notifications.description') }}</p>
                 </div>
-                <div class="actions">
+                <div class="section-actions">
+                  <span class="count-badge">{{ form.notifications.length }}</span>
                   <button type="button" class="secondary" @click="addNotification">
                     {{ t('notifications.add') }}
                   </button>
                 </div>
               </div>
 
-              <div v-if="!form.notifications.length" class="empty-note">
+              <div v-if="!form.notifications.length" class="empty-note section-empty">
                 {{ t('notifications.empty') }}
               </div>
 
@@ -716,22 +758,30 @@ onBeforeUnmount(() => {
                   @remove="removeNotification"
                 />
               </div>
-            </div>
+            </section>
 
-            <div class="field">
-              <label for="env-text">{{ t('general.envVars') }}</label>
-              <textarea
-                id="env-text"
-                v-model="form.envText"
-                style="min-height: 220px;"
-                placeholder="API_KEY=...&#10;USERNAME=...&#10;PASSWORD=..."
-              ></textarea>
-              <div class="hint" v-html="t('general.envVarsHint')"></div>
-            </div>
+            <section class="section-shell">
+              <div class="section-head">
+                <div class="section-copy">
+                  <span class="section-title">{{ t('general.section') }}</span>
+                  <h2>{{ t('general.envVars') }}</h2>
+                  <p v-html="t('general.envVarsHint')"></p>
+                </div>
+              </div>
+
+              <div class="field">
+                <textarea
+                  id="env-text"
+                  v-model="form.envText"
+                  style="min-height: 220px;"
+                  placeholder="API_KEY=...&#10;USERNAME=...&#10;PASSWORD=..."
+                ></textarea>
+              </div>
+            </section>
           </div>
         </div>
 
-        <div class="side-stack">
+        <aside class="side-stack">
           <div class="panel">
             <span class="section-title">{{ t('import.section') }}</span>
             <h2>{{ t('import.title') }}</h2>
@@ -932,7 +982,7 @@ onBeforeUnmount(() => {
               <code>bun run dev -- report</code>
             </div>
           </div>
-        </div>
+        </aside>
       </template>
     </main>
 
