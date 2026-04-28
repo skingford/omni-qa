@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>APICORE_OS - Dashboard &amp; Spec Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-primary-fixed-variant": "#6c3064",
+                            "primary": "#ffdcf4",
+                            "tertiary-fixed-dim": "#c7c6c6",
+                            "surface-variant": "#353535",
+                            "inverse-surface": "#e2e2e2",
+                            "on-primary": "#52184c",
+                            "on-background": "#e2e2e2",
+                            "on-error": "#690005",
+                            "tertiary-fixed": "#e3e2e2",
+                            "background": "#131313",
+                            "on-surface-variant": "#d3c2cc",
+                            "on-tertiary": "#2f3131",
+                            "on-tertiary-fixed-variant": "#464747",
+                            "on-tertiary-fixed": "#1a1c1c",
+                            "surface-bright": "#393939",
+                            "primary-fixed-dim": "#fbaeea",
+                            "on-tertiary-container": "#545555",
+                            "tertiary": "#e7e6e6",
+                            "outline-variant": "#4f434b",
+                            "on-secondary-fixed-variant": "#015300",
+                            "on-secondary-container": "#027100",
+                            "on-primary-fixed": "#390035",
+                            "surface-dim": "#131313",
+                            "surface-container": "#1f1f1f",
+                            "inverse-on-surface": "#303030",
+                            "on-error-container": "#ffdad6",
+                            "secondary-container": "#28ff1d",
+                            "on-secondary": "#013a00",
+                            "surface-container-highest": "#353535",
+                            "surface-container-high": "#2a2a2a",
+                            "outline": "#9c8c96",
+                            "secondary": "#edffe1",
+                            "primary-fixed": "#ffd7f3",
+                            "surface": "#131313",
+                            "inverse-primary": "#88487d",
+                            "surface-container-lowest": "#0e0e0e",
+                            "tertiary-container": "#cacaca",
+                            "on-primary-container": "#7c3e73",
+                            "secondary-fixed": "#77ff61",
+                            "on-surface": "#e2e2e2",
+                            "error-container": "#93000a",
+                            "primary-container": "#ffb1ee",
+                            "surface-container-low": "#1b1b1b",
+                            "error": "#ffb4ab",
+                            "secondary-fixed-dim": "#02e600",
+                            "on-secondary-fixed": "#002200",
+                            "surface-tint": "#fbaeea"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "sm": "8px",
+                            "margin": "32px",
+                            "md": "16px",
+                            "xs": "4px",
+                            "lg": "24px",
+                            "xl": "48px",
+                            "unit": "4px",
+                            "gutter": "24px"
+                    },
+                    "fontFamily": {
+                            "label-mono-sm": [
+                                    "Space Grotesk"
+                            ],
+                            "label-mono-lg": [
+                                    "Space Grotesk"
+                            ],
+                            "headline-sm": [
+                                    "Space Grotesk"
+                            ],
+                            "body-lg": [
+                                    "Inter"
+                            ],
+                            "body-md": [
+                                    "Inter"
+                            ],
+                            "body-sm": [
+                                    "Inter"
+                            ],
+                            "headline-lg": [
+                                    "Space Grotesk"
+                            ],
+                            "headline-md": [
+                                    "Space Grotesk"
+                            ]
+                    },
+                    "fontSize": {
+                            "label-mono-sm": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "1",
+                                            "letterSpacing": "0.1em",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "label-mono-lg": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "1",
+                                            "letterSpacing": "0.05em",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "headline-sm": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "1.2",
+                                            "letterSpacing": "0",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "1.6",
+                                            "letterSpacing": "0",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-md": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "1.5",
+                                            "letterSpacing": "0",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-sm": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "1.5",
+                                            "letterSpacing": "0",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "48px",
+                                    {
+                                            "lineHeight": "1.1",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "1.2",
+                                            "letterSpacing": "-0.01em",
+                                            "fontWeight": "600"
+                                    }
+                            ]
+                    }
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: #e2e2e2;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080808; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222222; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #353535; 
+        }
+    </style>
+</head>
+<body class="bg-black text-on-surface flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-14 px-6 bg-black z-50 docked full-width top-0 border-b border-[#222222] flat no shadows font-['Space_Grotesk'] font-medium tracking-tight">
+<div class="flex items-center gap-6">
+<span class="text-xl font-black text-[#FFB1EE] tracking-tighter italic">APICORE_OS</span>
+<div class="hidden md:flex items-center border border-[#A0A0A0] rounded-DEFAULT bg-black px-3 py-1.5 focus-within:border-[#FFB1EE] focus-within:ring-1 focus-within:ring-[#FFB1EE] transition-all">
+<span class="material-symbols-outlined text-[#A0A0A0] text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-surface text-body-sm font-body-sm focus:ring-0 p-0 w-64 placeholder-[#A0A0A0]" placeholder="Search API inventory..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#FFB1EE] border border-[#FFB1EE] px-4 py-1.5 rounded-DEFAULT text-label-mono-lg font-label-mono-lg hover:bg-[#121212] transition-colors">Import Spec</button>
+<button class="bg-[#FFB1EE] text-black px-4 py-1.5 rounded-DEFAULT text-label-mono-lg font-label-mono-lg hover:opacity-90 transition-opacity">Execute Test</button>
+<div class="flex items-center gap-2 border-l border-[#222222] pl-4 ml-2">
+<button class="text-[#A0A0A0] hover:text-[#FFB1EE] p-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#A0A0A0] hover:text-[#FFB1EE] p-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-[#222222] ml-2" data-alt="Portrait of a user for profile avatar, professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2Qm4xMSimzaDhRS64cHE-0qr7C69gYYkVcE7dj4_mZBeePM5gPiD0sz70Za3e2oKgnFbxssHoiDu5Eh8XnfMsp6RB763LccCKG0iMAbYgkyDnVU7whwybG8t1ZzQGvxpDfGYWKwC3LPyYmZq3z4wS9MYZ5satOa25bOaS8VoPqVRgGSG-SOjXOQ8j8hIjqXi3MZMnURMPT45uQcdmyI5x4ls0-Brj7WRlCPuhWNoxAoWOaxGZcq8u1SNThKqp7yDXcLU6iy_clMTZ"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full border-r border-[#222222] h-screen w-64 bg-[#080808] flat no shadows font-['Space_Grotesk'] text-sm uppercase tracking-wider">
+<div class="p-6 border-b border-[#222222]">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-DEFAULT bg-[#121212] border border-[#222222] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#FFB1EE]" data-icon="terminal">terminal</span>
+</div>
+<div>
+<h2 class="font-bold text-[#FFB1EE] tracking-tight">PROJECT_NEON</h2>
+<span class="text-xs text-[#A0A0A0]">V2.0.4-STABLE</span>
+</div>
+</div>
+<button class="w-full bg-[#121212] text-[#FFB1EE] border border-[#222222] hover:border-[#FFB1EE] py-2 rounded-DEFAULT text-label-mono-sm font-label-mono-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                    New Request
+                </button>
+</div>
+<div class="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto">
+<!-- Active Tab: Dashboard -->
+<a class="bg-[#FFB1EE]/10 text-[#FFB1EE] border-r-2 border-[#FFB1EE] flex items-center gap-3 px-3 py-2.5 rounded-l-DEFAULT transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="text-[#A0A0A0] hover:bg-[#121212] hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT transition-colors duration-200 ease-in-out border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="api">api</span>
+<span>API Inventory</span>
+</a>
+<a class="text-[#A0A0A0] hover:bg-[#121212] hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT transition-colors duration-200 ease-in-out border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="code">code</span>
+<span>Logic Editor</span>
+</a>
+<a class="text-[#A0A0A0] hover:bg-[#121212] hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT transition-colors duration-200 ease-in-out border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="terminal">terminal</span>
+<span>Terminal</span>
+</a>
+</div>
+<div class="p-4 border-t border-[#222222] flex flex-col gap-1">
+<a class="text-[#A0A0A0] hover:bg-[#121212] hover:text-white flex items-center gap-3 px-3 py-2 rounded-DEFAULT transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="description">description</span>
+<span class="text-xs">Docs</span>
+</a>
+<a class="text-[#A0A0A0] hover:bg-[#121212] hover:text-white flex items-center gap-3 px-3 py-2 rounded-DEFAULT transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="analytics">analytics</span>
+<span class="text-xs">Status</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-black p-gutter grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+<!-- Center Canvas (Dashboard & Specs) -->
+<div class="xl:col-span-9 flex flex-col gap-gutter">
+<!-- Page Header -->
+<div class="flex justify-between items-end pb-4 border-b border-[#222222]">
+<div>
+<h1 class="text-headline-md font-headline-md text-on-surface">Dashboard Overview</h1>
+<p class="text-body-md font-body-md text-[#A0A0A0] mt-1">System status and API specification management.</p>
+</div>
+</div>
+<!-- Bento Grid: System Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Metric Card 1 -->
+<div class="bg-[#121212] border border-[#222222] rounded-DEFAULT p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase">Total Endpoints</span>
+<span class="material-symbols-outlined text-[#FFB1EE]" data-icon="route">route</span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface">1,248</div>
+<div class="mt-2 text-xs text-[#00FF00] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                            +12 this week
+                        </div>
+</div>
+<!-- Metric Card 2 -->
+<div class="bg-[#121212] border border-[#222222] rounded-DEFAULT p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase">Active Tests</span>
+<span class="material-symbols-outlined text-[#FFB1EE]" data-icon="science">science</span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface">342</div>
+<div class="mt-2 text-xs text-[#A0A0A0] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="sync">sync</span>
+                            Running normally
+                        </div>
+</div>
+<!-- Metric Card 3 -->
+<div class="bg-[#121212] border border-[#222222] rounded-DEFAULT p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase">Error Rate</span>
+<span class="material-symbols-outlined text-[#FFB4AB]" data-icon="warning">warning</span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface">0.04%</div>
+<div class="mt-2 text-xs text-[#FFB4AB] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_down">trending_down</span>
+                            -0.01% since yesterday
+                        </div>
+</div>
+</div>
+<!-- Main Work Area Split -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Quick Import Panel (1/3 width) -->
+<div class="lg:col-span-1 bg-[#121212] border border-[#222222] rounded-DEFAULT flex flex-col h-[400px]">
+<div class="p-4 border-b border-[#222222] flex items-center gap-2">
+<span class="material-symbols-outlined text-[#FFB1EE]" data-icon="upload_file">upload_file</span>
+<h3 class="text-label-mono-lg font-label-mono-lg text-on-surface uppercase tracking-wider">Quick Import</h3>
+</div>
+<div class="flex-1 p-6 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#222222] m-4 rounded-DEFAULT bg-[#080808] hover:border-[#FFB1EE] hover:bg-[#FFB1EE]/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-[#A0A0A0] mb-4" data-icon="cloud_upload">cloud_upload</span>
+<p class="text-body-sm font-body-sm text-on-surface mb-2">Drag &amp; Drop OpenAPI Spec</p>
+<p class="text-xs text-[#A0A0A0]">Supports .json, .yaml, .yml (OAS 3.0+)</p>
+<div class="mt-6 flex items-center w-full px-4 gap-2">
+<div class="h-px bg-[#222222] flex-1"></div>
+<span class="text-xs text-[#A0A0A0] font-label-mono-sm uppercase">OR</span>
+<div class="h-px bg-[#222222] flex-1"></div>
+</div>
+<div class="mt-4 w-full px-4">
+<input class="w-full bg-black border border-[#222222] rounded-DEFAULT px-3 py-2 text-body-sm font-body-sm focus:border-[#FFB1EE] focus:ring-1 focus:ring-[#FFB1EE] transition-all text-on-surface placeholder-[#A0A0A0]" placeholder="Paste URL..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Imported Specs Table (2/3 width) -->
+<div class="lg:col-span-2 bg-[#121212] border border-[#222222] rounded-DEFAULT flex flex-col h-[400px]">
+<div class="p-4 border-b border-[#222222] flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#FFB1EE]" data-icon="list_alt">list_alt</span>
+<h3 class="text-label-mono-lg font-label-mono-lg text-on-surface uppercase tracking-wider">Managed Specifications</h3>
+</div>
+<button class="text-xs text-[#FFB1EE] hover:text-white transition-colors flex items-center gap-1 font-label-mono-sm">
+                                View All <span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#080808] sticky top-0 border-b border-[#222222]">
+<tr>
+<th class="p-3 text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase font-normal">Spec Name</th>
+<th class="p-3 text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase font-normal">Version</th>
+<th class="p-3 text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase font-normal">Endpoints</th>
+<th class="p-3 text-label-mono-sm font-label-mono-sm text-[#A0A0A0] uppercase font-normal text-right">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#222222]">
+<tr class="hover:bg-[#1a1a1a] transition-colors group">
+<td class="p-3 text-body-sm font-body-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#A0A0A0]" data-icon="description">description</span>
+                                            Payment Gateway API
+                                        </td>
+<td class="p-3">
+<span class="bg-[#222222] text-[#e2e2e2] px-2 py-0.5 rounded text-xs font-label-mono-sm border border-[#353535]">v1.4.2</span>
+</td>
+<td class="p-3 text-body-sm font-body-sm text-[#A0A0A0]">42</td>
+<td class="p-3 text-right">
+<span class="inline-flex items-center gap-1 text-[#00FF00] text-xs font-label-mono-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00FF00]"></span> Synced
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-[#1a1a1a] transition-colors group">
+<td class="p-3 text-body-sm font-body-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#A0A0A0]" data-icon="description">description</span>
+                                            User Identity Service
+                                        </td>
+<td class="p-3">
+<span class="bg-[#222222] text-[#e2e2e2] px-2 py-0.5 rounded text-xs font-label-mono-sm border border-[#353535]">v2.0.0-rc</span>
+</td>
+<td class="p-3 text-body-sm font-body-sm text-[#A0A0A0]">18</td>
+<td class="p-3 text-right">
+<span class="inline-flex items-center gap-1 text-[#FFB1EE] text-xs font-label-mono-sm">
+<span class="material-symbols-outlined text-[12px] animate-spin" data-icon="sync">sync</span> Syncing
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-[#1a1a1a] transition-colors group">
+<td class="p-3 text-body-sm font-body-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#A0A0A0]" data-icon="description">description</span>
+                                            Inventory Catalog
+                                        </td>
+<td class="p-3">
+<span class="bg-[#222222] text-[#e2e2e2] px-2 py-0.5 rounded text-xs font-label-mono-sm border border-[#353535]">v3.1.0</span>
+</td>
+<td class="p-3 text-body-sm font-body-sm text-[#A0A0A0]">156</td>
+<td class="p-3 text-right">
+<span class="inline-flex items-center gap-1 text-[#00FF00] text-xs font-label-mono-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00FF00]"></span> Synced
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-[#1a1a1a] transition-colors group">
+<td class="p-3 text-body-sm font-body-sm text-[#A0A0A0] flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#FFB4AB]" data-icon="error">error</span>
+                                            Legacy Auth (Deprecated)
+                                        </td>
+<td class="p-3">
+<span class="bg-[#222222] text-[#A0A0A0] px-2 py-0.5 rounded text-xs font-label-mono-sm border border-[#353535]">v0.9.8</span>
+</td>
+<td class="p-3 text-body-sm font-body-sm text-[#A0A0A0]">12</td>
+<td class="p-3 text-right">
+<span class="inline-flex items-center gap-1 text-[#A0A0A0] text-xs font-label-mono-sm">
+                                                Archived
+                                            </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar: Recent Jobs -->
+<div class="xl:col-span-3 flex flex-col gap-md h-full border-l border-[#222222] pl-gutter">
+<div class="flex items-center justify-between pb-2 border-b border-[#222222]">
+<h3 class="text-label-mono-lg font-label-mono-lg text-on-surface uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[#FFB1EE] text-[18px]" data-icon="history">history</span>
+                        Recent Jobs
+                    </h3>
+<span class="bg-[#222222] text-xs px-2 py-0.5 rounded font-label-mono-sm text-[#A0A0A0]">Live</span>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
+<!-- Job Item: Success -->
+<div class="bg-[#121212] border border-[#222222] p-3 rounded-DEFAULT">
+<div class="flex justify-between items-start mb-2">
+<div class="text-xs font-label-mono-sm text-[#00FF00] bg-[#00FF00]/10 px-1.5 py-0.5 rounded border border-[#00FF00]/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle">check_circle</span>
+                                COMPLETED
+                            </div>
+<span class="text-xs text-[#A0A0A0] font-label-mono-sm">2m ago</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface font-medium">Test Suite: Payment Flow</p>
+<p class="text-xs text-[#A0A0A0] mt-1 font-mono">Run ID: #88492</p>
+</div>
+<!-- Job Item: Running -->
+<div class="bg-[#121212] border border-[#FFB1EE]/50 p-3 rounded-DEFAULT relative overflow-hidden">
+<!-- Progress bar bg -->
+<div class="absolute bottom-0 left-0 h-0.5 bg-[#FFB1EE] w-[65%]"></div>
+<div class="flex justify-between items-start mb-2">
+<div class="text-xs font-label-mono-sm text-[#FFB1EE] bg-[#FFB1EE]/10 px-1.5 py-0.5 rounded border border-[#FFB1EE]/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] animate-spin" data-icon="autorenew">autorenew</span>
+                                RUNNING (65%)
+                            </div>
+<span class="text-xs text-[#A0A0A0] font-label-mono-sm">Just now</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface font-medium">Spec Import: User Identity</p>
+<p class="text-xs text-[#A0A0A0] mt-1 font-mono">Parsing schemas...</p>
+</div>
+<!-- Job Item: Failed -->
+<div class="bg-[#121212] border border-[#FFB4AB]/30 p-3 rounded-DEFAULT">
+<div class="flex justify-between items-start mb-2">
+<div class="text-xs font-label-mono-sm text-[#FFB4AB] bg-[#FFB4AB]/10 px-1.5 py-0.5 rounded border border-[#FFB4AB]/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="cancel">cancel</span>
+                                FAILED
+                            </div>
+<span class="text-xs text-[#A0A0A0] font-label-mono-sm">15m ago</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface font-medium">Fuzz Test: Catalog API</p>
+<p class="text-xs text-[#FFB4AB] mt-1 font-mono">Error: 502 Bad Gateway on /items</p>
+</div>
+<!-- Job Item: Success -->
+<div class="bg-[#121212] border border-[#222222] p-3 rounded-DEFAULT opacity-70">
+<div class="flex justify-between items-start mb-2">
+<div class="text-xs font-label-mono-sm text-[#00FF00] bg-[#00FF00]/10 px-1.5 py-0.5 rounded border border-[#00FF00]/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle">check_circle</span>
+                                COMPLETED
+                            </div>
+<span class="text-xs text-[#A0A0A0] font-label-mono-sm">1h ago</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface font-medium">Daily Regression Suite</p>
+<p class="text-xs text-[#A0A0A0] mt-1 font-mono">Passed 412/412 assertions</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

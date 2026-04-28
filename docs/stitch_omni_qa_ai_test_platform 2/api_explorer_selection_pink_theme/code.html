@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>API Explorer - APICORE_OS</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#6c3064",
+                        "primary": "#ffdcf4",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "surface-variant": "#353535",
+                        "inverse-surface": "#e2e2e2",
+                        "on-primary": "#52184c",
+                        "on-background": "#e2e2e2",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#e3e2e2",
+                        "background": "#131313",
+                        "on-surface-variant": "#d3c2cc",
+                        "on-tertiary": "#2f3131",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "surface-bright": "#393939",
+                        "primary-fixed-dim": "#fbaeea",
+                        "on-tertiary-container": "#545555",
+                        "tertiary": "#e7e6e6",
+                        "outline-variant": "#4f434b",
+                        "on-secondary-fixed-variant": "#015300",
+                        "on-secondary-container": "#027100",
+                        "on-primary-fixed": "#390035",
+                        "surface-dim": "#131313",
+                        "surface-container": "#1f1f1f",
+                        "inverse-on-surface": "#303030",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#28ff1d",
+                        "on-secondary": "#013a00",
+                        "surface-container-highest": "#353535",
+                        "surface-container-high": "#2a2a2a",
+                        "outline": "#9c8c96",
+                        "secondary": "#edffe1",
+                        "primary-fixed": "#ffd7f3",
+                        "surface": "#131313",
+                        "inverse-primary": "#88487d",
+                        "surface-container-lowest": "#0e0e0e",
+                        "tertiary-container": "#cacaca",
+                        "on-primary-container": "#7c3e73",
+                        "secondary-fixed": "#77ff61",
+                        "on-surface": "#e2e2e2",
+                        "error-container": "#93000a",
+                        "primary-container": "#ffb1ee",
+                        "surface-container-low": "#1b1b1b",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#02e600",
+                        "on-secondary-fixed": "#002200",
+                        "surface-tint": "#fbaeea"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "margin": "32px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "xl": "48px",
+                        "unit": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-mono-sm": ["Space Grotesk"],
+                        "label-mono-lg": ["Space Grotesk"],
+                        "headline-sm": ["Space Grotesk"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-mono-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "500" }],
+                        "label-mono-lg": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.2", "letterSpacing": "0", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        /* Custom scrollbar for brutalist aesthetic */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #131313; border-left: 1px solid #353535; }
+        ::-webkit-scrollbar-thumb { background: #353535; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffb1ee; }
+
+        /* Custom Checkbox */
+        .brutal-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #9c8c96; /* outline */
+            background-color: #131313; /* background */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .brutal-checkbox:checked {
+            background-color: #ffb1ee; /* primary-container */
+            border-color: #ffb1ee;
+        }
+        .brutal-checkbox:checked::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background-color: #131313;
+        }
+        .brutal-checkbox:focus-visible {
+            outline: 2px solid #ffb1ee;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen flex overflow-hidden antialiased">
+<aside class="flex flex-col h-full border-r border-[#222222] bg-[#080808] h-screen w-64 border-r">
+<div class="p-lg border-b border-[#121212] flex items-center gap-md">
+<div class="w-10 h-10 bg-primary-container flex items-center justify-center rounded-DEFAULT">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">hexagon</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-[#FFB1EE] m-0 leading-none">PROJECT_NEON</h1>
+<p class="font-label-mono-sm text-label-mono-sm text-[#A0A0A0] mt-xs">V2.0.4-STABLE</p>
+</div>
+</div>
+<div class="p-md border-b border-[#121212]">
+<button class="w-full py-sm px-md border border-[#FFB1EE] text-[#FFB1EE] font-label-mono-lg text-label-mono-lg flex items-center justify-center gap-sm hover:bg-[#FFB1EE]/10 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined">add</span>
+                New Request
+            </button>
+</div>
+<nav class="flex-1 overflow-y-auto py-md">
+<ul class="flex flex-col gap-xs px-sm">
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out rounded-DEFAULT" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider bg-[#FFB1EE]/10 text-[#FFB1EE] border-r-2 border-[#FFB1EE] transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">api</span>
+                        API Inventory
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out rounded-DEFAULT" href="#">
+<span class="material-symbols-outlined text-[20px]">code</span>
+                        Logic Editor
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out rounded-DEFAULT" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+                        Terminal
+                    </a>
+</li>
+</ul>
+</nav>
+<div class="border-t border-[#121212] p-sm">
+<ul class="flex flex-col gap-xs">
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out rounded-DEFAULT" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+                        Docs
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out rounded-DEFAULT" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+                        Status
+                    </a>
+</li>
+</ul>
+</div>
+</aside>
+<div class="flex flex-col flex-1 min-w-0">
+<header class="flex justify-between items-center w-full h-14 px-6 bg-black z-50 docked full-width top-0 border-b border-[#222222]">
+<div class="flex items-center gap-lg">
+<span class="text-xl font-black text-[#FFB1EE] tracking-tighter italic">APICORE_OS</span>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-[#A0A0A0] text-[18px]">search</span>
+<input class="bg-[#121212] border border-[#222222] text-white font-['Space_Grotesk'] text-sm pl-10 pr-4 py-1.5 focus:outline-none focus:border-[#FFB1EE] w-64 transition-colors" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="font-['Space_Grotesk'] font-medium tracking-tight text-[#A0A0A0] hover:text-[#FFB1EE] hover:bg-[#121212] active:scale-95 transition-all duration-100 px-3 py-1.5 rounded-DEFAULT text-sm">
+                    Import Spec
+                </button>
+<button class="font-['Space_Grotesk'] font-medium tracking-tight text-black bg-[#FFB1EE] hover:bg-white active:scale-95 transition-all duration-100 px-4 py-1.5 rounded-DEFAULT text-sm border border-[#FFB1EE]">
+                    Execute Test
+                </button>
+<div class="h-6 w-px bg-[#222222] mx-2"></div>
+<button class="text-[#A0A0A0] hover:text-[#FFB1EE] hover:bg-[#121212] p-1.5 rounded-DEFAULT transition-all">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="text-[#A0A0A0] hover:text-[#FFB1EE] hover:bg-[#121212] p-1.5 rounded-DEFAULT transition-all">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<div class="ml-2 w-8 h-8 bg-surface-variant rounded-full border border-[#222222] overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">person</span>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-hidden flex flex-col p-lg gap-lg bg-background">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background m-0">API Explorer</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Select endpoints to construct a targeted testing suite.</p>
+</div>
+<div class="flex gap-md">
+<div class="flex items-center gap-xs text-secondary-fixed-dim bg-secondary-fixed-dim/10 px-3 py-1 border border-secondary-fixed-dim/20 rounded-DEFAULT">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
+<span class="font-label-mono-sm text-label-mono-sm">API STATUS: GREEN</span>
+</div>
+</div>
+</div>
+<div class="flex-1 flex gap-gutter overflow-hidden min-h-0">
+<section class="flex-1 flex flex-col border border-surface-variant bg-surface-container-low rounded-DEFAULT overflow-hidden">
+<div class="p-md border-b border-surface-variant bg-surface-container flex items-center justify-between">
+<div class="flex gap-sm">
+<button class="px-3 py-1.5 border border-outline-variant bg-surface text-on-surface font-label-mono-sm text-label-mono-sm hover:border-primary-container transition-colors rounded-DEFAULT">Expand All</button>
+<button class="px-3 py-1.5 border border-outline-variant bg-surface text-on-surface font-label-mono-sm text-label-mono-sm hover:border-primary-container transition-colors rounded-DEFAULT">Collapse All</button>
+</div>
+<div class="flex items-center gap-sm">
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">FILTER:</span>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 border border-secondary-fixed-dim/30 text-secondary-fixed-dim font-label-mono-sm text-[10px] cursor-pointer hover:bg-secondary-fixed-dim/10">GET</span>
+<span class="px-2 py-0.5 border border-primary-container/30 text-primary-container font-label-mono-sm text-[10px] cursor-pointer hover:bg-primary-container/10">POST</span>
+<span class="px-2 py-0.5 border border-outline-variant text-on-surface font-label-mono-sm text-[10px] cursor-pointer bg-surface">ALL</span>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-sm flex flex-col gap-xs">
+<div class="border border-surface-variant bg-surface rounded-DEFAULT overflow-hidden">
+<div class="flex items-center gap-sm p-sm bg-surface-container-highest cursor-pointer hover:bg-surface-variant transition-colors border-b border-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">folder_open</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-background font-bold tracking-wider">/v1/authentication</span>
+<span class="ml-auto font-label-mono-sm text-label-mono-sm text-on-surface-variant">2 ENDPOINTS</span>
+</div>
+<div class="flex flex-col divide-y divide-surface-variant">
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input checked="" class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-primary-container/10 border border-primary-container/30 text-primary-container font-label-mono-sm text-[11px] w-14 text-center">POST</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/login</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Authenticate user session</span>
+</label>
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-primary-container/10 border border-primary-container/30 text-primary-container font-label-mono-sm text-[11px] w-14 text-center">POST</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/refresh</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Refresh JWT token</span>
+</label>
+</div>
+</div>
+<div class="border border-surface-variant bg-surface rounded-DEFAULT overflow-hidden">
+<div class="flex items-center gap-sm p-sm bg-surface-container-highest cursor-pointer hover:bg-surface-variant transition-colors border-b border-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">folder_open</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-background font-bold tracking-wider">/v1/workspaces</span>
+<span class="ml-auto font-label-mono-sm text-label-mono-sm text-on-surface-variant">4 ENDPOINTS</span>
+</div>
+<div class="flex flex-col divide-y divide-surface-variant">
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input checked="" class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-secondary-fixed-dim/10 border border-secondary-fixed-dim/30 text-secondary-fixed-dim font-label-mono-sm text-[11px] w-14 text-center">GET</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/list</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Retrieve user workspaces</span>
+</label>
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input checked="" class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-primary-container/10 border border-primary-container/30 text-primary-container font-label-mono-sm text-[11px] w-14 text-center">POST</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/create</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Initialize new workspace</span>
+</label>
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-secondary-fixed-dim/10 border border-secondary-fixed-dim/30 text-secondary-fixed-dim font-label-mono-sm text-[11px] w-14 text-center">GET</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/{id}/details</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Get specific workspace data</span>
+</label>
+<label class="flex items-center gap-md p-sm hover:bg-surface-container transition-colors cursor-pointer group">
+<input class="brutal-checkbox" type="checkbox"/>
+<span class="px-2 py-1 bg-error/10 border border-error/30 text-error font-label-mono-sm text-[11px] w-14 text-center">DEL</span>
+<span class="font-label-mono-lg text-label-mono-lg text-on-surface group-hover:text-primary transition-colors">/{id}/delete</span>
+<span class="ml-auto font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Remove workspace</span>
+</label>
+</div>
+</div>
+</div>
+</section>
+<aside class="w-96 flex flex-col border border-surface-variant bg-surface rounded-DEFAULT overflow-hidden shrink-0">
+<div class="p-md border-b border-surface-variant bg-surface-container-highest flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-background m-0 text-[18px]">Test Suite Selection</h3>
+<div class="w-8 h-8 rounded-DEFAULT bg-primary-container text-on-primary-container flex items-center justify-center font-label-mono-lg text-label-mono-lg font-bold">
+                            3
+                        </div>
+</div>
+<div class="flex-1 overflow-y-auto p-sm flex flex-col gap-sm bg-surface-container-low">
+<div class="p-sm border border-outline-variant bg-surface rounded-DEFAULT flex items-start gap-sm group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary-container text-[18px]">api</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-primary-container font-label-mono-sm text-[10px]">POST</span>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface truncate">/v1/authentication/login</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[12px] m-0">Target: Critical path coverage</p>
+</div>
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="p-sm border border-outline-variant bg-surface rounded-DEFAULT flex items-start gap-sm group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[18px]">api</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-secondary-fixed-dim font-label-mono-sm text-[10px]">GET</span>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface truncate">/v1/workspaces/list</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[12px] m-0">Target: Read validation</p>
+</div>
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="p-sm border border-outline-variant bg-surface rounded-DEFAULT flex items-start gap-sm group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary-container text-[18px]">api</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-primary-container font-label-mono-sm text-[10px]">POST</span>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface truncate">/v1/workspaces/create</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[12px] m-0">Target: State mutation handling</p>
+</div>
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<div class="p-md border-t border-surface-variant bg-surface-container flex flex-col gap-sm">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-mono-sm text-label-mono-sm">EST. GENERATION TIME:</span>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface">~45 SEC</span>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container hover:bg-primary transition-colors py-3 px-4 rounded-DEFAULT font-label-mono-lg text-label-mono-lg font-bold flex items-center justify-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined">auto_awesome</span>
+                            Generate AI Test Cases
+                        </button>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</body></html>

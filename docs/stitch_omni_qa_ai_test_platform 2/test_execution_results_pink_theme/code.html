@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>APICORE_OS - Test Execution</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-primary-fixed-variant": "#6c3064",
+                            "primary": "#ffdcf4",
+                            "tertiary-fixed-dim": "#c7c6c6",
+                            "surface-variant": "#353535",
+                            "inverse-surface": "#e2e2e2",
+                            "on-primary": "#52184c",
+                            "on-background": "#e2e2e2",
+                            "on-error": "#690005",
+                            "tertiary-fixed": "#e3e2e2",
+                            "background": "#131313",
+                            "on-surface-variant": "#d3c2cc",
+                            "on-tertiary": "#2f3131",
+                            "on-tertiary-fixed-variant": "#464747",
+                            "on-tertiary-fixed": "#1a1c1c",
+                            "surface-bright": "#393939",
+                            "primary-fixed-dim": "#fbaeea",
+                            "on-tertiary-container": "#545555",
+                            "tertiary": "#e7e6e6",
+                            "outline-variant": "#4f434b",
+                            "on-secondary-fixed-variant": "#015300",
+                            "on-secondary-container": "#027100",
+                            "on-primary-fixed": "#390035",
+                            "surface-dim": "#131313",
+                            "surface-container": "#1f1f1f",
+                            "inverse-on-surface": "#303030",
+                            "on-error-container": "#ffdad6",
+                            "secondary-container": "#28ff1d",
+                            "on-secondary": "#013a00",
+                            "surface-container-highest": "#353535",
+                            "surface-container-high": "#2a2a2a",
+                            "outline": "#9c8c96",
+                            "secondary": "#edffe1",
+                            "primary-fixed": "#ffd7f3",
+                            "surface": "#131313",
+                            "inverse-primary": "#88487d",
+                            "surface-container-lowest": "#0e0e0e",
+                            "tertiary-container": "#cacaca",
+                            "on-primary-container": "#7c3e73",
+                            "secondary-fixed": "#77ff61",
+                            "on-surface": "#e2e2e2",
+                            "error-container": "#93000a",
+                            "primary-container": "#ffb1ee",
+                            "surface-container-low": "#1b1b1b",
+                            "error": "#ffb4ab",
+                            "secondary-fixed-dim": "#02e600",
+                            "on-secondary-fixed": "#002200",
+                            "surface-tint": "#fbaeea"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "sm": "8px",
+                            "margin": "32px",
+                            "md": "16px",
+                            "xs": "4px",
+                            "lg": "24px",
+                            "xl": "48px",
+                            "unit": "4px",
+                            "gutter": "24px"
+                    },
+                    "fontFamily": {
+                            "label-mono-sm": ["Space Grotesk"],
+                            "label-mono-lg": ["Space Grotesk"],
+                            "headline-sm": ["Space Grotesk"],
+                            "body-lg": ["Inter"],
+                            "body-md": ["Inter"],
+                            "body-sm": ["Inter"],
+                            "headline-lg": ["Space Grotesk"],
+                            "headline-md": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                            "label-mono-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "500" }],
+                            "label-mono-lg": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                            "headline-sm": ["24px", { "lineHeight": "1.2", "letterSpacing": "0", "fontWeight": "600" }],
+                            "body-lg": ["18px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                            "body-md": ["16px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                            "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                            "headline-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                            "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Base strict reset for elements */
+        button, input { outline: none; }
+        /* Scrollbar styling for IDE feel */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #131313; border-left: 1px solid #2a2a2a; }
+        ::-webkit-scrollbar-thumb { background: #353535; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f434b; }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen w-screen overflow-hidden flex font-body-md text-body-md">
+<!-- SideNavBar (From JSON) -->
+<aside class="flex flex-col h-screen w-64 border-r border-[#222222] bg-[#080808] shrink-0 z-40 transition-colors duration-200 ease-in-out">
+<!-- Header -->
+<div class="px-6 py-gutter border-b border-[#121212] flex flex-col justify-center">
+<h1 class="font-bold text-[#FFB1EE] text-xl tracking-tight">PROJECT_NEON</h1>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider text-[#A0A0A0] mt-1">V2.0.4-STABLE</span>
+</div>
+<!-- CTA -->
+<div class="p-6 pb-2">
+<button class="w-full bg-[#FFB1EE] text-black font-['Space_Grotesk'] text-sm uppercase tracking-wider py-2 font-bold hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out border border-transparent hover:border-[#FFB1EE]">
+                New Request
+            </button>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 flex flex-col mt-4">
+<a class="flex items-center px-6 py-3 text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[20px]" data-icon="api">api</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">API Inventory</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[20px]" data-icon="code">code</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">Logic Editor</span>
+</a>
+<!-- Active State: Terminal -->
+<a class="flex items-center px-6 py-3 bg-[#FFB1EE]/10 text-[#FFB1EE] border-r-2 border-[#FFB1EE] transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[20px]" data-icon="terminal">terminal</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">Terminal</span>
+</a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto border-t border-[#121212] py-4">
+<a class="flex items-center px-6 py-2 text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[18px]" data-icon="description">description</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">Docs</span>
+</a>
+<a class="flex items-center px-6 py-2 text-[#A0A0A0] hover:bg-[#121212] hover:text-white transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-4 text-[18px]" data-icon="analytics">analytics</span>
+<span class="font-['Space_Grotesk'] text-sm uppercase tracking-wider">Status</span>
+</a>
+</div>
+</aside>
+<!-- Main Workspace -->
+<div class="flex flex-col flex-1 min-w-0 bg-background">
+<!-- TopNavBar (From JSON) -->
+<header class="flex justify-between items-center w-full h-14 px-6 bg-black z-50 docked full-width top-0 border-b border-[#222222] shrink-0">
+<div class="flex items-center h-full">
+<!-- Brand Logo -->
+<div class="text-xl font-black text-[#FFB1EE] tracking-tighter italic mr-8">APICORE_OS</div>
+<!-- Search Bar -->
+<div class="flex items-center h-8 bg-[#121212] border border-[#222222] px-3 focus-within:border-[#FFB1EE] transition-colors">
+<span class="material-symbols-outlined text-[#A0A0A0] text-[16px] mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-[#FFB1EE] font-['Space_Grotesk'] font-medium tracking-tight text-sm placeholder-[#A0A0A0] w-64 focus:ring-0 p-0" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<!-- Actions & Profile -->
+<div class="flex items-center space-x-md">
+<button class="px-4 py-1.5 border border-[#222222] text-[#A0A0A0] font-['Space_Grotesk'] font-medium tracking-tight text-sm hover:border-[#FFB1EE] hover:text-[#FFB1EE] hover:bg-[#121212] active:scale-95 transition-all duration-100">
+                    Import Spec
+                </button>
+<button class="px-4 py-1.5 bg-[#FFB1EE] text-black font-['Space_Grotesk'] font-medium tracking-tight text-sm hover:bg-[#121212] hover:text-[#FFB1EE] hover:border-[#FFB1EE] border border-transparent active:scale-95 transition-all duration-100">
+                    Execute Test
+                </button>
+<div class="flex items-center space-x-sm border-l border-[#222222] pl-md ml-2">
+<button class="w-8 h-8 flex items-center justify-center text-[#A0A0A0] hover:text-[#FFB1EE] transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-[#A0A0A0] hover:text-[#FFB1EE] transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-none border border-[#222222] ml-2 object-cover" data-alt="Abstract dark pink and black geometric pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlO1XXcKynYyr5ARmi5VWj6bqF92Yzl0fxmaTT9r5fyCQ3N2ZobkYaVHE30M6SdBjb7QjqUaUcdC4BWE6XaGNQ45CDz3DnMTz-g7vH_UKtxFMzrjKugPfLNqzY8_mL4AeM5olpO3g7py-4xSziy3_FNmez1-Q0TdYY0q7NBr_BYXGU9zjBgxzpI6xDSP8lbf_jain5OfZxkWkGEzeWG_pBHkQHRzadEFrkAQAmSOXH5eXh4cC1YLUmfCl2URC9lDhQLjqW6DiHMy9o"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content Canvas -->
+<main class="flex-1 overflow-y-auto p-gutter flex flex-col gap-lg">
+<!-- Page Header -->
+<div class="flex justify-between items-end border-b border-surface-container-high pb-md">
+<div>
+<div class="flex items-center space-x-sm mb-2">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-label-mono-sm text-label-mono-sm text-tertiary">RUN-ID: 892-ALPHA</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">14:02:45 UTC</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary">Test Execution Results</h2>
+</div>
+<div class="flex space-x-sm">
+<button class="px-4 py-2 border border-surface-container text-on-surface font-label-mono-lg text-label-mono-lg hover:border-primary hover:text-primary transition-colors flex items-center">
+<span class="material-symbols-outlined mr-2 text-[18px]">download</span> Export Report
+                    </button>
+</div>
+</div>
+<!-- Metrics Bento Grid -->
+<div class="grid grid-cols-4 gap-sm">
+<!-- Metric Card 1 -->
+<div class="bg-surface p-md border border-surface-container flex flex-col justify-between">
+<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">Total Requests</span>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-sm">245</div>
+</div>
+<!-- Metric Card 2 -->
+<div class="bg-surface p-md border border-secondary-container/30 flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-secondary/5 blur-xl rounded-full"></div>
+<span class="font-label-mono-sm text-label-mono-sm text-secondary uppercase">Passed</span>
+<div class="font-headline-lg text-headline-lg text-secondary mt-sm">238</div>
+</div>
+<!-- Metric Card 3 -->
+<div class="bg-surface p-md border border-error/50 flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error/10 blur-xl rounded-full"></div>
+<span class="font-label-mono-sm text-label-mono-sm text-error uppercase">Failed</span>
+<div class="font-headline-lg text-headline-lg text-error mt-sm">7</div>
+</div>
+<!-- Metric Card 4 -->
+<div class="bg-surface p-md border border-surface-container flex flex-col justify-between">
+<span class="font-label-mono-sm text-label-mono-sm text-outline uppercase">Avg Latency</span>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-sm">142<span class="text-headline-sm font-headline-sm text-outline ml-1">ms</span></div>
+</div>
+</div>
+<!-- Split View: Test List & AI Insights -->
+<div class="grid grid-cols-12 gap-lg flex-1 min-h-[500px]">
+<!-- Left: Test Results Data Grid -->
+<div class="col-span-8 bg-surface border border-surface-container flex flex-col">
+<div class="p-md border-b border-surface-container flex justify-between items-center bg-surface-container-highest/30">
+<h3 class="font-label-mono-lg text-label-mono-lg text-on-surface uppercase tracking-widest">Execution Trace</h3>
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-outline text-[18px]">filter_list</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">Filter: Failed Only</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-0">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-container bg-[#080808]">
+<th class="p-sm px-md font-label-mono-sm text-label-mono-sm text-outline font-normal">Method</th>
+<th class="p-sm px-md font-label-mono-sm text-label-mono-sm text-outline font-normal">Endpoint</th>
+<th class="p-sm px-md font-label-mono-sm text-label-mono-sm text-outline font-normal">Latency</th>
+<th class="p-sm px-md font-label-mono-sm text-label-mono-sm text-outline font-normal text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-label-mono-sm text-label-mono-sm">
+<!-- Failed Row 1 -->
+<tr class="border-b border-surface-container hover:bg-surface-container-high transition-colors cursor-pointer bg-error/5">
+<td class="p-sm px-md"><span class="px-2 py-1 bg-surface-container border border-primary text-primary">POST</span></td>
+<td class="p-sm px-md text-on-surface font-medium">/api/v2/auth/verify_token</td>
+<td class="p-sm px-md text-outline">412ms</td>
+<td class="p-sm px-md text-right"><span class="text-error font-bold tracking-wider">FAILED</span></td>
+</tr>
+<!-- Failed Row 2 -->
+<tr class="border-b border-surface-container hover:bg-surface-container-high transition-colors cursor-pointer bg-error/5">
+<td class="p-sm px-md"><span class="px-2 py-1 bg-surface-container border border-primary text-primary">POST</span></td>
+<td class="p-sm px-md text-on-surface font-medium">/api/v2/users/me/profile</td>
+<td class="p-sm px-md text-outline">285ms</td>
+<td class="p-sm px-md text-right"><span class="text-error font-bold tracking-wider">FAILED</span></td>
+</tr>
+<!-- Passed Row 1 -->
+<tr class="border-b border-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<td class="p-sm px-md"><span class="px-2 py-1 bg-surface-container border border-secondary text-secondary">GET</span></td>
+<td class="p-sm px-md text-on-surface">/api/v2/inventory/list</td>
+<td class="p-sm px-md text-outline">89ms</td>
+<td class="p-sm px-md text-right"><span class="text-secondary tracking-wider">PASSED</span></td>
+</tr>
+<!-- Passed Row 2 -->
+<tr class="border-b border-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<td class="p-sm px-md"><span class="px-2 py-1 bg-surface-container border border-outline-variant text-on-surface">PUT</span></td>
+<td class="p-sm px-md text-on-surface">/api/v2/settings/update</td>
+<td class="p-sm px-md text-outline">156ms</td>
+<td class="p-sm px-md text-right"><span class="text-secondary tracking-wider">PASSED</span></td>
+</tr>
+<!-- Passed Row 3 -->
+<tr class="border-b border-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<td class="p-sm px-md"><span class="px-2 py-1 bg-surface-container border border-secondary text-secondary">GET</span></td>
+<td class="p-sm px-md text-on-surface">/api/v2/health/check</td>
+<td class="p-sm px-md text-outline">22ms</td>
+<td class="p-sm px-md text-right"><span class="text-secondary tracking-wider">PASSED</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right: AI Insights Panel -->
+<div class="col-span-4 bg-[#080808] border border-primary/40 flex flex-col relative">
+<!-- Glow effect on border -->
+<div class="absolute inset-0 pointer-events-none border border-primary blur-[2px] opacity-20"></div>
+<div class="p-md border-b border-surface-container flex items-center space-x-2 bg-primary/5">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="font-label-mono-lg text-label-mono-lg text-primary uppercase tracking-widest">AI Failure Analysis</h3>
+</div>
+<div class="p-md flex-1 overflow-y-auto flex flex-col gap-md">
+<div class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface">Pattern Detected:</strong> 5 out of 7 failures exhibit identical behavior related to JWT validation. The API endpoints successfully receive the payload but reject the Authorization header with a <code class="text-primary font-label-mono-sm bg-surface-container px-1">401 Unauthorized</code> status.
+                        </div>
+<div class="border border-surface-container bg-surface-lowest p-sm mt-2">
+<div class="font-label-mono-sm text-label-mono-sm text-outline mb-2">Likely Root Cause</div>
+<p class="font-body-sm text-body-sm text-on-surface">The <code class="text-primary">verify_token</code> middleware appears to be strictly enforcing a new claim <code class="text-secondary">"scope": "read:write"</code> which is absent from the generated test tokens in Environment <code class="text-on-surface font-bold">ALPHA</code>.</p>
+</div>
+<div class="mt-4 flex flex-col gap-2">
+<span class="font-label-mono-sm text-label-mono-sm text-outline">Suggested Fix (Raw Response Fragment):</span>
+<div class="bg-[#1a1c1c] border border-surface-container p-sm font-label-mono-sm text-label-mono-sm overflow-x-auto">
+<pre><code class="text-on-surface">{
+  <span class="text-secondary">"error"</span>: <span class="text-primary">"Invalid Token Scope"</span>,
+  <span class="text-secondary">"code"</span>: <span class="text-error">401</span>,
+  <span class="text-secondary">"details"</span>: {
+    <span class="text-secondary">"missing_claim"</span>: <span class="text-primary">"scope"</span>,
+    <span class="text-secondary">"required"</span>: <span class="text-primary">["read:write"]</span>
+  }
+}</code></pre>
+</div>
+</div>
+<div class="mt-auto pt-md">
+<button class="w-full py-2 bg-transparent border border-primary text-primary font-label-mono-lg text-label-mono-lg hover:bg-primary hover:text-black transition-colors">
+                                Auto-Patch Environment Variables
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
