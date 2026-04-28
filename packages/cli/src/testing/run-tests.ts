@@ -14,6 +14,7 @@ export interface RunPlaywrightOptions {
   workers?: string | number;
   streamOutput?: boolean;
   outputLimit?: number;
+  signal?: AbortSignal;
 }
 
 export interface RunPlaywrightResult {
@@ -100,6 +101,7 @@ export async function runPlaywrightTests(
     });
 
     let buffer = '';
+    let aborted = false;
 
     const appendChunk = (chunk: string, target?: NodeJS.WriteStream) => {
       if (options.streamOutput && target) {
@@ -112,7 +114,29 @@ export async function runPlaywrightTests(
     child.stdout.on('data', (chunk) => appendChunk(String(chunk), process.stdout));
     child.stderr.on('data', (chunk) => appendChunk(String(chunk), process.stderr));
     child.once('error', reject);
-    child.once('close', (code) => resolve({ exitCode: code ?? 1, output: buffer.trim() }));
+    child.once('close', (code) => {
+      options.signal?.removeEventListener('abort', abort);
+      resolve({
+        exitCode: aborted ? 130 : (code ?? 1),
+        output: buffer.trim(),
+      });
+    });
+
+    const abort = () => {
+      aborted = true;
+      child.kill('SIGTERM');
+      setTimeout(() => {
+        if (!child.killed) {
+          child.kill('SIGKILL');
+        }
+      }, 2_000).unref();
+    };
+
+    if (options.signal?.aborted) {
+      abort();
+    } else {
+      options.signal?.addEventListener('abort', abort, { once: true });
+    }
   });
 
   const report = await getReportPreviewState(prepared.cwd);

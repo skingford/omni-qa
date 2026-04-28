@@ -131,6 +131,28 @@ bun run dev -- config --no-open
 bun run dev:config-studio
 ```
 
+### AI OpenAPI Closed Loop
+
+The Node.js orchestration backend powers the newer closed-loop workflow:
+
+```bash
+# terminal 1: start the Node backend on 127.0.0.1:3210
+bun run dev:server
+
+# terminal 2: run the Vite config studio; /api proxies to the backend
+bun run dev:config-studio
+```
+
+In the `AI Loop` panel you can:
+
+- import an OpenAPI/Swagger URL as an async job
+- filter and select endpoints from the imported catalog
+- generate structured test-case DSL with the deterministic fallback generator
+- run generated cases through Playwright using the configured environment
+- inspect run counts, case results, and report artifact paths
+
+The backend stores local workflow state under `.omni-qa/server` by default.
+
 ### `omni-qa report`
 
 Open the latest HTML test report in browser.
@@ -198,11 +220,33 @@ Sensitive values use `${VAR}` interpolation. Set them in `.env` files:
 
 `omni-qa init` only adds the placeholders that match the auth and notification options you selected, so a minimal scaffold can keep `.env.example` intentionally small.
 
+### Node Backend Settings
+
+The closed-loop backend is configured with environment variables:
+
+```bash
+OMNI_SERVER_HOST=127.0.0.1
+OMNI_SERVER_PORT=3210
+OMNI_SERVER_DATA_DIR=.omni-qa/server
+OMNI_IMPORT_MAX_BYTES=5242880
+OMNI_IMPORT_TIMEOUT_MS=15000
+OMNI_PARSE_TIMEOUT_MS=20000
+OMNI_MAX_ENDPOINTS_PER_SPEC=2000
+OMNI_MAX_SELECTION_SIZE=500
+OMNI_MAX_CONCURRENT_RUNS=2
+OMNI_MAX_CASES_PER_RUN=500
+OMNI_RUN_TIMEOUT_MS=600000
+OMNI_AI_PROMPT_MAX_CHARS=40000
+```
+
+AI provider integration is adapter-based. Until a provider is configured, the backend uses deterministic fallback cases derived from OpenAPI parameters, request examples, and 2xx response metadata.
+
 ## Architecture
 
 ```
 apps/
-└── config-studio/      # Standalone Vue + Vite config studio
+├── config-studio/      # Standalone Vue + Vite config studio
+└── server/             # Node.js closed-loop orchestration backend
 
 packages/
 ├── cli/
@@ -221,12 +265,18 @@ packages/
 
 ## Workspace Scripts
 
-- `bun run build` — build `packages/core`, `packages/cli`, and the Vue config studio
+- `bun run build` — build `packages/core`, `packages/cli`, the Node backend, and the Vue config studio
 - `bun run build:core` — build the shared runtime package
 - `bun run build:cli` — build the CLI package after core is ready
+- `bun run build:server` — build the server after core and CLI helpers are ready
+- `bun run dev:server` — run the Node closed-loop backend
 - `bun run dev:config-studio` — run the standalone config studio app in Vite
 - `bun run preview:config-studio` — preview the built frontend bundle
 - `bun run dev -- config` — build core, then run the CLI from `packages/cli/src` against the repo root
+- `bun run test:server` — run backend service tests
+- `bun run test:closed-loop` — run backend service tests and build the config studio
+- `bun run smoke:petstore` — import Petstore, generate fallback cases, execute one generated run, and read the report
+- `bun run openspec:status` — show implementation progress for the closed-loop OpenSpec change
 
 The root `/Users/kingford/workspace/github.com/omni-qa/playwright.config.ts` is now only a thin wrapper around the shared Playwright defaults exported by `@omni-qa/core`.
 

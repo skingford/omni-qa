@@ -6,6 +6,16 @@
   "bin": {
     "omni-qa": "./dist/cli/index.js"
   },
+  "exports": {
+    "./testing/run-tests": {
+      "types": "./dist/testing/run-tests.d.ts",
+      "default": "./dist/testing/run-tests.js"
+    },
+    "./testing/report-paths": {
+      "types": "./dist/testing/report-paths.d.ts",
+      "default": "./dist/testing/report-paths.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "bun src/cli/index.ts"

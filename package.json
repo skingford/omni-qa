@@ -10,13 +10,19 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run build:config-studio && bun run build:cli",
+    "build": "bun run build:config-studio && bun run build:cli && bun run build:server",
     "build:cli": "bun run build:core && bun --filter @omni-qa/cli build",
     "build:core": "bun --filter @omni-qa/core build",
     "build:config-studio": "bun --filter @omni-qa/config-studio build",
+    "build:server": "bun run build:cli && bun --filter @omni-qa/server build",
     "dev": "bun run build:core && bun ./packages/cli/src/cli/index.ts",
     "dev:config-studio": "bun --filter @omni-qa/config-studio dev",
+    "dev:server": "bun run build:cli && bun --filter @omni-qa/server dev",
     "preview:config-studio": "bun --filter @omni-qa/config-studio preview",
+    "test:server": "bun run build:core && bun --filter @omni-qa/server test",
+    "test:closed-loop": "bun run test:server && bun run build:config-studio",
+    "smoke:petstore": "bun run build:server && bun --filter @omni-qa/server smoke:petstore",
+    "openspec:status": "openspec status --change ai-openapi-test-loop",
     "test": "bun run build:core && bunx playwright test",
     "report": "bunx playwright show-report reports/html"
   },

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import AITestLoopPanel from './components/AITestLoopPanel.vue'
 import EnvironmentCard from './components/EnvironmentCard.vue'
 import NotificationCard from './components/NotificationCard.vue'
 import { locale, localeChoices, setLocale, t } from './lib/i18n'
@@ -603,6 +604,8 @@ onBeforeUnmount(() => {
               </div>
             </section>
           </div>
+
+          <AITestLoopPanel :default-env="effectiveDefaultEnv" />
         </div>
 
         <aside class="side-stack">

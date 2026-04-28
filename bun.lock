@@ -20,6 +20,18 @@
         "vite": "^7.1.7",
       },
     },
+    "apps/server": {
+      "name": "@omni-qa/server",
+      "version": "1.0.0",
+      "dependencies": {
+        "@omni-qa/cli": "workspace:*",
+        "@omni-qa/core": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^25.5.0",
+        "typescript": "^5.9.3",
+      },
+    },
     "packages/cli": {
       "name": "@omni-qa/cli",
       "version": "1.0.0",
@@ -129,6 +141,8 @@
     "@omni-qa/config-studio": ["@omni-qa/config-studio@workspace:apps/config-studio"],
 
     "@omni-qa/core": ["@omni-qa/core@workspace:packages/core"],
+
+    "@omni-qa/server": ["@omni-qa/server@workspace:apps/server"],
 
     "@playwright/test": ["@playwright/test@1.58.2", "", { "dependencies": { "playwright": "1.58.2" }, "bin": { "playwright": "cli.js" } }, "sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA=="],
 

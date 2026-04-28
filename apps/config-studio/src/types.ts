@@ -186,3 +186,109 @@ export interface NotificationFormItem {
 }
 
 export type StatusType = 'success' | 'error' | 'info'
+
+export type ClosedLoopJobStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'canceled'
+
+export interface ClosedLoopJob {
+  id: string
+  type: 'openapi-import' | 'ai-generation' | 'test-run'
+  status: ClosedLoopJobStatus
+  createdAt: string
+  updatedAt: string
+  startedAt?: string
+  finishedAt?: string
+  error?: string
+  result?: Record<string, unknown>
+}
+
+export interface ClosedLoopSpec {
+  id: string
+  sourceUrl: string
+  title: string
+  version: string
+  importedAt: string
+  contentHash: string
+  endpointCount: number
+  baseUrl?: string
+}
+
+export interface ClosedLoopEndpoint {
+  id: string
+  specId: string
+  method: string
+  path: string
+  tags: string[]
+  parameters: unknown[]
+  responses: unknown[]
+  deprecated: boolean
+  operationId?: string
+  summary?: string
+  description?: string
+  requestBody?: unknown
+}
+
+export interface ClosedLoopSelection {
+  id: string
+  specId: string
+  endpointIds: string[]
+  createdAt: string
+  name?: string
+}
+
+export interface ClosedLoopTestCase {
+  id: string
+  endpointId: string
+  specId: string
+  name: string
+  scenarioType: string
+  priority: string
+  status: string
+  request: {
+    method: string
+    path: string
+    query?: Record<string, string | number | boolean>
+    headers?: Record<string, string>
+    body?: unknown
+    timeoutMs?: number
+  }
+  assertions: unknown[]
+  tags: string[]
+  createdAt: string
+  selectionId?: string
+  model?: string
+  promptVersion?: string
+}
+
+export interface ClosedLoopRun {
+  id: string
+  status: ClosedLoopJobStatus
+  envId: string
+  caseIds: string[]
+  createdAt: string
+  updatedAt: string
+  total: number
+  passed: number
+  failed: number
+  skipped: number
+  startedAt?: string
+  finishedAt?: string
+  report?: {
+    htmlReportDir?: string
+    jsonReportPath?: string
+    outputPreview?: string
+  }
+  error?: string
+}
+
+export interface ClosedLoopResult {
+  id: string
+  runId: string
+  caseId: string
+  endpointId: string
+  status: string
+  durationMs: number
+  createdAt: string
+  responseStatus?: number
+  error?: string
+  assertionFailures?: string[]
+}

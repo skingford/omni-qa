@@ -1,0 +1,21 @@
+{
+  "name": "@omni-qa/server",
+  "private": true,
+  "version": "1.0.0",
+  "description": "omni-qa Node.js orchestration backend",
+  "type": "module",
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "bun test src/**/*.test.ts",
+    "smoke:petstore": "bun src/testing/petstore-smoke.ts"
+  },
+  "dependencies": {
+    "@omni-qa/cli": "workspace:*",
+    "@omni-qa/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  }
+}
