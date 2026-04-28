@@ -40,6 +40,7 @@ body {
   margin: 0;
   overflow: hidden;
   background: var(--bg);
+  text-rendering: geometricPrecision;
 }
 
 button,
@@ -50,6 +51,14 @@ select {
 
 button {
   cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
 }
 
 ::selection {
@@ -189,7 +198,11 @@ button {
 }
 
 .btn {
+  display: inline-flex;
   height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 1px solid var(--primary);
   padding: 0 26px;
   font-family: var(--mono);
@@ -213,6 +226,17 @@ button {
   border-color: #ffffff;
 }
 
+.btn:active,
+.new-request:active,
+.selection-footer button:active,
+.ai-body button:active {
+  transform: translateY(1px);
+}
+
+.btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
 .top-divider {
   width: 1px;
   height: 40px;
@@ -231,6 +255,7 @@ button {
 
 .icon-button:hover {
   color: var(--primary);
+  background: var(--surface);
 }
 
 .avatar {
@@ -239,6 +264,7 @@ button {
   height: 40px;
   place-items: center;
   border: 1px solid var(--panel-border);
+  border-radius: 999px;
   background: var(--surface-3);
   color: var(--muted-2);
 }
@@ -302,7 +328,7 @@ button {
   justify-content: center;
   gap: 12px;
   height: 52px;
-  margin: 22px 30px 30px;
+  margin: 22px 20px 30px;
   border: 1px solid var(--primary);
   color: var(--primary);
   background: transparent;
@@ -341,6 +367,7 @@ button {
   min-height: 54px;
   border-right: 3px solid transparent;
   color: var(--muted);
+  margin-left: 10px;
   padding: 0 30px;
   font-family: var(--mono);
   font-size: 18px;
@@ -351,6 +378,7 @@ button {
 
 .nav-link.small {
   min-height: 44px;
+  margin-left: 0;
   padding: 0;
   font-size: 16px;
 }
@@ -449,6 +477,16 @@ button {
   text-transform: uppercase;
 }
 
+.metric-head .tone-success,
+.metric-head .tone-muted,
+.metric-head .tone-primary {
+  color: var(--primary);
+}
+
+.metric-head .tone-danger {
+  color: var(--danger);
+}
+
 .metric-card strong {
   margin-top: 28px;
   color: var(--text);
@@ -476,6 +514,19 @@ button {
 .quick-import {
   display: flex;
   flex-direction: column;
+}
+
+.managed-specs {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.table-scroll,
+.trace-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
 }
 
 .panel-title {
@@ -528,6 +579,13 @@ button {
   border: 2px dashed var(--surface-3);
   background: var(--surface-lowest);
   text-align: center;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.drop-zone:hover,
+.drop-zone:focus-within {
+  border-color: var(--primary);
+  background: rgba(255, 177, 238, 0.04);
 }
 
 .drop-zone .big-icon {
@@ -587,6 +645,9 @@ button {
 
 .spec-table thead,
 .trace-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background: var(--surface-lowest);
 }
 
@@ -598,6 +659,7 @@ button {
   padding: 18px 16px;
   color: var(--muted);
   font-size: 18px;
+  white-space: nowrap;
 }
 
 .spec-table th,
@@ -612,11 +674,31 @@ button {
   color: var(--text);
 }
 
-.spec-table td:first-child {
-  display: flex;
+.spec-name-cell {
+  display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: 12px;
   font-size: 20px;
+  line-height: 1.35;
+}
+
+.spec-name-cell .material-symbols-outlined {
+  flex-shrink: 0;
+}
+
+.spec-table th:not(:first-child),
+.spec-table td:not(:first-child) {
+  white-space: nowrap;
+}
+
+.spec-table th:last-child,
+.spec-table td:last-child {
+  text-align: right;
+}
+
+.spec-table tbody tr:hover {
+  background: var(--surface-2);
 }
 
 .version-pill {
@@ -634,8 +716,39 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 6px;
   min-width: 86px;
   font-size: 15px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.status-text.tone-primary .status-dot,
+.health-pill i {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.tone-fill-success {
+  color: var(--green-strong);
+}
+
+.tone-fill-primary {
+  color: var(--primary);
+}
+
+.tone-fill-danger {
+  color: var(--danger);
+}
+
+.tone-fill-muted,
+.tone-fill-neutral {
+  color: var(--muted);
 }
 
 .recent-jobs {
@@ -694,6 +807,12 @@ button {
   background: var(--surface);
   padding: 16px;
   overflow: hidden;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.job-card:hover {
+  border-color: var(--outline);
+  background: #151515;
 }
 
 .job-card .progress {
@@ -730,6 +849,10 @@ button {
   font-size: 14px;
 }
 
+.job-state.tone-primary .material-symbols-outlined {
+  animation: spin 1.1s linear infinite;
+}
+
 .job-card strong {
   display: block;
   margin-top: 16px;
@@ -751,14 +874,18 @@ button {
   flex: 1;
   flex-direction: column;
   overflow: hidden;
-  padding: 36px 30px 30px;
+  padding: 28px 30px 30px;
 }
 
 .workspace-title {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+}
+
+.api-view .workspace-title {
+  align-items: center;
 }
 
 .workspace-title h1 {
@@ -797,6 +924,11 @@ button {
   gap: 30px;
 }
 
+.api-view .panel {
+  border-color: var(--surface-4);
+  background: #1a1a1a;
+}
+
 .endpoint-panel,
 .selection-panel {
   display: flex;
@@ -810,7 +942,7 @@ button {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--surface-4);
-  background: var(--surface-3);
+  background: #202020;
   padding: 0 20px;
 }
 
@@ -821,7 +953,11 @@ button {
 }
 
 .endpoint-toolbar button {
+  display: inline-flex;
   height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1px solid var(--outline);
   color: var(--text);
   background: var(--surface-low);
@@ -829,6 +965,18 @@ button {
   font-family: var(--mono);
   font-weight: 700;
   letter-spacing: 0.08em;
+  white-space: nowrap;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.endpoint-toolbar button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
+}
+
+.endpoint-toolbar button .material-symbols-outlined {
+  font-size: 17px;
 }
 
 .method-filter {
@@ -848,7 +996,7 @@ button {
 
 .endpoint-group {
   border: 1px solid var(--surface-4);
-  background: var(--surface);
+  background: #111111;
 }
 
 .endpoint-group header {
@@ -877,7 +1025,7 @@ button {
 
 .endpoint-row {
   display: grid;
-  min-height: 54px;
+  min-height: 53px;
   grid-template-columns: 28px 72px minmax(140px, 1fr) minmax(180px, 1.2fr);
   align-items: center;
   gap: 14px;
@@ -929,6 +1077,7 @@ button {
   font-family: var(--mono);
   font-size: 14px;
   font-weight: 700;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
 }
 
 .method-get {
@@ -988,12 +1137,34 @@ button {
   grid-template-columns: 24px minmax(0, 1fr) 24px;
   gap: 12px;
   border: 1px solid var(--outline);
-  background: var(--surface);
+  background: #141414;
   padding: 14px;
+  transition: border-color 120ms ease, background 120ms ease;
 }
 
-.selection-card > .material-symbols-outlined:last-child {
+.selection-card:hover {
+  border-color: var(--primary);
+  background: #181818;
+}
+
+.card-icon-action {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  align-self: start;
+  border: 0;
   color: var(--muted);
+  background: transparent;
+  padding: 0;
+}
+
+.card-icon-action:hover {
+  color: var(--danger);
+}
+
+.card-icon-action .material-symbols-outlined {
+  font-size: 20px;
 }
 
 .selection-card strong {
@@ -1048,6 +1219,12 @@ button {
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.selection-footer button:hover {
+  color: #000000;
+  background: #ffffff;
 }
 
 .logic-canvas {
@@ -1099,7 +1276,27 @@ button {
 .file-tree-title > div {
   display: flex;
   gap: 10px;
+}
+
+.tree-action,
+.var-remove {
+  display: grid;
+  place-items: center;
+  border: 0;
   color: var(--muted);
+  background: transparent;
+  padding: 0;
+}
+
+.tree-action {
+  width: 28px;
+  height: 28px;
+}
+
+.tree-action:hover,
+.var-remove:hover {
+  color: var(--primary);
+  background: var(--surface-3);
 }
 
 .tree-body {
@@ -1117,6 +1314,12 @@ button {
   gap: 8px;
   color: var(--muted-2);
   font-size: 18px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.tree-row:hover {
+  color: var(--text);
+  background: var(--surface);
 }
 
 .tree-row.file {
@@ -1317,6 +1520,10 @@ button {
   text-transform: uppercase;
 }
 
+.field-head button:hover {
+  color: #ffffff;
+}
+
 .var-row {
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr) 24px;
@@ -1329,8 +1536,21 @@ button {
   background: var(--surface-low);
 }
 
+.var-remove {
+  width: 24px;
+  height: 24px;
+}
+
+.var-remove:hover {
+  color: var(--danger);
+}
+
 .var-row .material-symbols-outlined {
   color: var(--muted);
+}
+
+.var-remove:hover .material-symbols-outlined {
+  color: currentColor;
 }
 
 .results-view {
@@ -1383,6 +1603,13 @@ button {
   font-family: var(--mono);
   font-size: 17px;
   font-weight: 700;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.results-title button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
 }
 
 .result-metric {
@@ -1466,6 +1693,10 @@ button {
   letter-spacing: 0.08em;
 }
 
+.trace-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
 .trace-table tbody tr.failed-row {
   background: rgba(255, 180, 171, 0.05);
 }
@@ -1491,16 +1722,16 @@ button {
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
   overflow-y: auto;
-  padding: 22px;
+  padding: 20px;
 }
 
 .ai-body p {
   margin: 0;
   color: var(--text);
-  font-size: 18px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.5;
 }
 
 .ai-body code {
@@ -1513,30 +1744,36 @@ button {
 .root-cause {
   border: 1px solid var(--surface-3);
   background: var(--bg);
-  padding: 14px;
+  padding: 12px;
 }
 
 .root-cause span,
 .response-fragment span {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: var(--muted);
   font-family: var(--mono);
+  font-size: 13px;
   letter-spacing: 0.1em;
+  line-height: 1.35;
 }
 
 .response-fragment pre {
   margin: 0;
+  border: 1px solid var(--surface-3);
   overflow-x: auto;
   background: #1a1c1c;
-  padding: 16px;
+  padding: 14px;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .ai-body button {
+  min-height: 42px;
   height: 42px;
+  flex-shrink: 0;
   margin-top: auto;
   border: 1px solid var(--primary);
   color: var(--primary);
@@ -1545,6 +1782,40 @@ button {
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.06em;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.ai-body button:hover {
+  color: #000000;
+  background: var(--primary);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 .tone-success,
@@ -1581,6 +1852,10 @@ button {
 
 .tone-border-neutral {
   border-color: var(--surface-3);
+}
+
+.job-card.tone-border-success {
+  border-color: var(--panel-border);
 }
 
 @media (max-width: 1180px) {
@@ -1672,6 +1947,7 @@ button {
     min-height: 58px;
     justify-content: center;
     gap: 0;
+    margin-left: 0;
     padding: 0;
   }
 
@@ -1789,12 +2065,18 @@ button {
     height: 96px;
   }
 
-  .trace-panel {
+  .trace-scroll {
     overflow-x: auto;
   }
 
   .trace-table {
-    min-width: 760px;
+    min-width: 620px;
+  }
+
+  .trace-table th,
+  .trace-table td {
+    padding: 10px 14px;
+    font-size: 14px;
   }
 
   .ai-panel {
@@ -1854,15 +2136,256 @@ button {
     overflow-y: auto;
   }
 
-  .metrics.three,
   .dashboard-work {
     height: auto;
     grid-template-columns: 1fr;
   }
 
-  .metric-card,
-  .quick-import,
+  .metrics.three {
+    height: 150px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .metric-card {
+    min-height: 150px;
+    padding: 18px;
+  }
+
   .managed-specs {
     min-height: 220px;
+  }
+
+  .quick-import {
+    min-height: 420px;
+  }
+
+  .dashboard-work {
+    gap: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .top-bar {
+    padding: 0 12px;
+  }
+
+  .top-left {
+    gap: 0;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .search-box {
+    display: none;
+  }
+
+  .btn.primary {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .side-nav {
+    width: 74px;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 74px minmax(0, 1fr);
+  }
+
+  .page-title.compact {
+    padding: 0 16px;
+  }
+
+  .nav-link {
+    min-height: 54px;
+  }
+
+  .metrics.three {
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    min-height: 156px;
+  }
+
+  .workspace {
+    padding: 24px 16px;
+  }
+
+  .workspace-title h1,
+  .results-title h1 {
+    font-size: 32px;
+  }
+
+  .selection-title h2 {
+    font-size: 24px;
+  }
+
+  .endpoint-row {
+    gap: 10px;
+    grid-template-columns: 24px 64px minmax(0, 1fr);
+  }
+
+  .endpoint-toolbar {
+    padding: 14px 10px;
+  }
+
+  .endpoint-toolbar > div:first-child,
+  .method-filter {
+    width: 100%;
+  }
+
+  .endpoint-toolbar button {
+    flex: 1;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .method-filter {
+    flex-wrap: wrap;
+  }
+
+  .endpoint-group header span:last-child {
+    display: none;
+  }
+
+  .endpoint-row strong,
+  .endpoint-row > span:last-child {
+    font-size: 16px;
+  }
+
+  .metrics.four {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .result-metric {
+    min-height: 92px;
+    padding: 16px 18px;
+  }
+
+  .result-metric strong {
+    font-size: 42px;
+  }
+
+  .result-metric small {
+    font-size: 22px;
+  }
+
+  .results-title {
+    gap: 14px;
+    padding-bottom: 18px;
+  }
+
+  .run-line {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .results-grid {
+    margin-top: 20px;
+  }
+
+  .trace-panel {
+    min-height: auto;
+  }
+
+  .trace-title {
+    height: 82px;
+  }
+
+  .trace-scroll {
+    flex: initial;
+    overflow: visible;
+  }
+
+  .trace-table,
+  .trace-table tbody,
+  .trace-table tr,
+  .trace-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .trace-table {
+    min-width: 0;
+  }
+
+  .trace-table thead {
+    display: none;
+  }
+
+  .trace-table tbody tr {
+    border-bottom: 1px solid var(--panel-border);
+    padding: 12px 14px;
+  }
+
+  .trace-table td {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    border-bottom: 0;
+    padding: 6px 0;
+    letter-spacing: 0.03em;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .trace-table td::before {
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .trace-table td:nth-child(1)::before {
+    content: "Method";
+  }
+
+  .trace-table td:nth-child(2)::before {
+    content: "Endpoint";
+  }
+
+  .trace-table td:nth-child(3)::before {
+    content: "Latency";
+  }
+
+  .trace-table td:nth-child(4)::before {
+    content: "Status";
+  }
+
+  .trace-table td:nth-child(2) {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .trace-table td .method-tag {
+    justify-self: end;
+  }
+
+  .quick-import {
+    min-height: 400px;
+  }
+
+  .drop-zone {
+    margin: 14px;
+  }
+
+  .drop-zone strong {
+    margin-top: 18px;
+  }
+
+  .drop-zone span {
+    margin-top: 12px;
+  }
+
+  .or-line {
+    margin: 20px 0 12px;
   }
 }

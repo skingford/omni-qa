@@ -234,9 +234,11 @@ function TopBar({
       </div>
       <div className="top-actions">
         <button className="btn ghost" type="button">
+          <Icon name="upload_file" />
           Import Spec
         </button>
         <button className="btn primary" onClick={() => onNavigate('results')} type="button">
+          <Icon name="play_arrow" fill />
           Execute Test
         </button>
         <div className="top-divider" />
@@ -323,33 +325,40 @@ function ManagedSpecs() {
           <Icon name="arrow_forward" />
         </button>
       </div>
-      <table className="spec-table">
-        <thead>
-          <tr>
-            <th>Spec Name</th>
-            <th>Version</th>
-            <th>Endpoints</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {specs.map(([name, version, endpoints, status, tone]) => (
-            <tr key={name}>
-              <td>
-                <Icon name={tone === 'muted' ? 'error' : 'description'} />
-                {name}
-              </td>
-              <td>
-                <span className="version-pill">{version}</span>
-              </td>
-              <td>{endpoints}</td>
-              <td>
-                <span className={`status-text tone-${tone}`}>{status}</span>
-              </td>
+      <div className="table-scroll">
+        <table className="spec-table">
+          <thead>
+            <tr>
+              <th>Spec Name</th>
+              <th>Version</th>
+              <th>Endpoints</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {specs.map(([name, version, endpoints, status, tone]) => (
+              <tr key={name}>
+                <td>
+                  <span className="spec-name-cell">
+                    <Icon name={tone === 'muted' ? 'error' : 'description'} />
+                    {name}
+                  </span>
+                </td>
+                <td>
+                  <span className="version-pill">{version}</span>
+                </td>
+                <td>{endpoints}</td>
+                <td>
+                  <span className={`status-text tone-${tone}`}>
+                    <i className={`status-dot tone-fill-${tone}`} />
+                    {status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </article>
   )
 }
@@ -421,8 +430,14 @@ function ApiExplorerView() {
         <section className="panel endpoint-panel">
           <div className="endpoint-toolbar">
             <div>
-              <button type="button">Expand All</button>
-              <button type="button">Collapse All</button>
+              <button type="button">
+                <Icon name="unfold_more" />
+                Expand All
+              </button>
+              <button type="button">
+                <Icon name="unfold_less" />
+                Collapse All
+              </button>
             </div>
             <div className="method-filter">
               <span>FILTER:</span>
@@ -467,7 +482,9 @@ function ApiExplorerView() {
                   </div>
                   <p>{detail}</p>
                 </div>
-                <Icon name="close" />
+                <button aria-label={`Remove ${path}`} className="card-icon-action" type="button">
+                  <Icon name="close" />
+                </button>
               </article>
             ))}
           </div>
@@ -498,8 +515,12 @@ function LogicEditorView() {
         <div className="file-tree-title">
           <h2>Test Explorer</h2>
           <div>
-            <Icon name="create_new_folder" />
-            <Icon name="note_add" />
+            <button aria-label="Create folder" className="tree-action" type="button">
+              <Icon name="create_new_folder" />
+            </button>
+            <button aria-label="Create test file" className="tree-action" type="button">
+              <Icon name="note_add" />
+            </button>
           </div>
         </div>
         <div className="tree-body">
@@ -597,7 +618,9 @@ function VarRow({ name, value }: { name: string; value: string }) {
     <div className="var-row">
       <input readOnly value={name} />
       <input readOnly value={value} />
-      <Icon name="close" />
+      <button aria-label={`Remove ${name}`} className="var-remove" type="button">
+        <Icon name="close" />
+      </button>
     </div>
   )
 }
@@ -633,30 +656,32 @@ function ExecutionResultsView() {
               Filter: Failed Only
             </span>
           </div>
-          <table className="trace-table">
-            <thead>
-              <tr>
-                <th>Method</th>
-                <th>Endpoint</th>
-                <th>Latency</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resultRows.map(([method, endpoint, latency, status, failed]) => (
-                <tr className={failed ? 'failed-row' : ''} key={endpoint}>
-                  <td>
-                    <MethodTag method={method} />
-                  </td>
-                  <td>{endpoint}</td>
-                  <td>{latency}</td>
-                  <td>
-                    <strong className={failed ? 'tone-danger' : 'tone-success'}>{status}</strong>
-                  </td>
+          <div className="trace-scroll">
+            <table className="trace-table">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Endpoint</th>
+                  <th>Latency</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {resultRows.map(([method, endpoint, latency, status, failed]) => (
+                  <tr className={failed ? 'failed-row' : ''} key={endpoint}>
+                    <td>
+                      <MethodTag method={method} />
+                    </td>
+                    <td>{endpoint}</td>
+                    <td>{latency}</td>
+                    <td>
+                      <strong className={failed ? 'tone-danger' : 'tone-success'}>{status}</strong>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </article>
         <aside className="panel ai-panel">
           <div className="ai-title">
